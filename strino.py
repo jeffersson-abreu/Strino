@@ -13,13 +13,10 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
+import functions.system
 import argparse
 import sys
 import os
-
-
-def list_devices():
-    print("Listing devices...")
 
 
 if __name__ == '__main__':
@@ -39,5 +36,5 @@ if __name__ == '__main__':
         sys.path.append(BASE_DIR)
 
     if args.list:
-        list_devices()
-
+        for device in functions.system.get_all_devices_info():
+            print(device.get('name'))
