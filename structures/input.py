@@ -13,7 +13,7 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-
+import constants.uinput
 import structures.time
 import ctypes
 
@@ -62,3 +62,15 @@ class InputEvent(ctypes.Structure):
         ("code", ctypes.c_uint16),          # Event code
         ("value", ctypes.c_int32),          # Event value
     ]
+
+
+class UinputSetup(ctypes.Structure):
+    """
+    Represents a uinput setup
+    """
+    _fields_ = [
+        ("id", InputId),
+        ("name", ctypes.c_char * constants.uinput.UINPUT_MAX_NAME_SIZE),
+        ("ff_effects_max", ctypes.c_uint32),
+    ]
+
