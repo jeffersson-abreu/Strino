@@ -13,8 +13,13 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-import globals.constants
+
 import structures.input
+
+import constants.ecodes
+import constants.input
+import constants.glob
+
 import ctypes
 import fcntl
 import os
@@ -32,7 +37,7 @@ def get_device_info(file: open) -> dict:
     fd = file.fileno()
 
     # Create the string buffer to make future ioctl calls
-    max_name_size = ctypes.sizeof(globals.constants.MAX_NAME_SIZE)
+    max_name_size = ctypes.sizeof(constants.input.MAX_NAME_SIZE)
     name = ctypes.create_string_buffer(max_name_size)
     phys = ctypes.create_string_buffer(max_name_size)
     uniq = ctypes.create_string_buffer(max_name_size)
@@ -43,18 +48,18 @@ def get_device_info(file: open) -> dict:
     ctypes.memset(ctypes.addressof(iid), 0, ctypes.sizeof(iid))
 
     # Get the file ID (type, vendor, product, version)
-    fcntl.ioctl(fd, globals.constants.EVIOCGID, iid)
+    fcntl.ioctl(fd, constants.input.EVIOCGID, iid)
 
     # Get the device name
-    fcntl.ioctl(fd, globals.constants.EVIOCGNAME, name)
+    fcntl.ioctl(fd, constants.input.EVIOCGNAME, name)
 
     # Some devices do not have a physical topology associated with them
-    fcntl.ioctl(fd, globals.constants.EVIOCGPHYS, phys)
+    fcntl.ioctl(fd, constants.input.EVIOCGPHYS, phys)
 
     try:
         # Some kernels have started reporting bluetooth controller MACs as phys.
         # This lets us get the real physical address. As with phys, it may be blank.
-        fcntl.ioctl(fd, globals.constants.EVIOCGUNIQ, uniq)
+        fcntl.ioctl(fd, constants.input.EVIOCGUNIQ, uniq)
     except IOError:
         pass
 
@@ -77,11 +82,16 @@ def get_all_devices_handlers() -> set:
     """
     file_handlers = set()
 
-    for _, _, files in os.walk(globals.constants.DEVICES_PATH):
+    for _, _, files in os.walk(constants.glob.DEVICES_PATH):
         for file in files:
             # Filter only files that name starts with "event"
             if file.startswith('event'):
-                file_handlers.add(file)
+                file_handlers.add(
+                    os.path.join(
+                        constants.glob.DEVICES_PATH,
+                        file
+                    )
+                )
 
     return file_handlers
 
@@ -95,7 +105,7 @@ def get_all_devices_info() -> list:
     all_devices = list()
 
     for file in get_all_devices_handlers():
-        file_path = os.path.join(globals.constants.DEVICES_PATH, file)
+        file_path = os.path.join(constants.glob.DEVICES_PATH, file)
         with open(file_path, 'r') as handler:
             device_info = get_device_info(handler)
             all_devices.append(device_info)
@@ -123,25 +133,25 @@ def get_device_capabilities(file: open) -> dict:
 
     # Create char arrays to be filed in ioctl calls. This char's
     # array a will handle events and key codes related to event
-    cd_bits = ctypes.create_string_buffer(globals.constants.KEY_MAX // 8 + 1)
-    ev_bits = ctypes.create_string_buffer(globals.constants.EV_MAX // 8 + 1)
+    cd_bits = ctypes.create_string_buffer(constants.ecodes.KEY_MAX // 8 + 1)
+    ev_bits = ctypes.create_string_buffer(constants.ecodes.EV_MAX // 8 + 1)
 
     capabilities = dict()
 
     # Fill 0 (clean) the memory space of ev_bits and call ioctl to get bits of
     # all event codes suported by device so we can build the device capabilities
     ctypes.memset(ctypes.addressof(ev_bits), 0, ctypes.sizeof(ev_bits))
-    fcntl.ioctl(file, globals.constants.EVIOCGBIT(0, ctypes.sizeof(ev_bits)), ev_bits)
+    fcntl.ioctl(file, constants.input.EVIOCGBIT(0, ctypes.sizeof(ev_bits)), ev_bits)
 
     # Build a dictionary of the device's capabilities
-    for ev_type in range(0, globals.constants.EV_MAX):
+    for ev_type in range(0, constants.ecodes.EV_MAX):
         if test_bit(ev_bits.raw, ev_type):
 
             try:
                 # Fill 0 (clean) the momory space of cd_bits and call ioctl to get all
                 # related event codes so we can build a list of codes handled by event
                 ctypes.memset(ctypes.addressof(cd_bits), 0, ctypes.sizeof(cd_bits))
-                fcntl.ioctl(file, globals.constants.EVIOCGBIT(ev_type, ctypes.sizeof(cd_bits)), cd_bits)
+                fcntl.ioctl(file, constants.input.EVIOCGBIT(ev_type, ctypes.sizeof(cd_bits)), cd_bits)
             except OSError:
                 # Sometime an argument error occurs we
                 # just break the loop and keep going
@@ -150,17 +160,17 @@ def get_device_capabilities(file: open) -> dict:
             # if no error occurs so add the event key
             capabilities[ev_type] = []
 
-            for ev_code in range(0, globals.constants.KEY_MAX):
+            for ev_code in range(0, constants.ecodes.KEY_MAX):
                 if test_bit(cd_bits.raw, ev_code):
 
-                    if ev_type == globals.constants.EV_ABS:
+                    if ev_type == constants.ecodes.EV_ABS:
                         abs_info = structures.input.ABSInfo()
 
                         # At this point we just check if event type is EV_ABS so clean the memory
                         # space of the instance of ABSInfo defined above and call the kernel to
                         # give us info about ABS device capabilities
                         ctypes.memset(ctypes.addressof(abs_info), 0, ctypes.sizeof(abs_info))
-                        fcntl.ioctl(file, globals.constants.EVIOCGABS(ev_code), abs_info)
+                        fcntl.ioctl(file, constants.input.EVIOCGABS(ev_code), abs_info)
 
                         _abs = {
                             'value': abs_info.value,

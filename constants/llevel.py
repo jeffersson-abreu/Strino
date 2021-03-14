@@ -13,16 +13,8 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-import structures.input
 import ctypes
 
-
-# Linux living devices handler files
-DEVICES_PATH = '/dev/input'
-
-#
-# ioctl.h
-#
 # The original linux ioctl numbering scheme was just a general
 # "anything goes" setup, where more or less random numbers were
 # assigned.  Sorry, I was clueless when I started out on this.
@@ -84,57 +76,3 @@ def ior(t, nr, size):
 
 def iowr(t, nr, size):
     return ioc(IOC_READ | IOC_WRITE, t, nr, ioc_typecheck(size))
-
-
-#
-# input.h
-#
-
-# Define the maximun name size of a device
-MAX_NAME_SIZE = ctypes.create_string_buffer(256)
-
-# Device id base generator
-DEVICE_ID_BASE = ord('E')
-
-# Get devices ID
-EVIOCGID = ior(DEVICE_ID_BASE, 0x02, structures.input.InputId)
-
-# Get Devices name
-EVIOCGNAME = ior(DEVICE_ID_BASE, 0x06, MAX_NAME_SIZE)
-
-# Get devices location
-EVIOCGPHYS = ior(DEVICE_ID_BASE, 0x07, MAX_NAME_SIZE)
-
-# Get devices unique identifier
-EVIOCGUNIQ = ior(DEVICE_ID_BASE, 0x08, MAX_NAME_SIZE)
-
-
-def EVIOCGBIT(ev_type, lenght) -> int:
-    """
-    Get events bits
-    :param ev_type: Event code (0 retrieves all event handled)
-    :param lenght: The length of string buffer (ctypes)
-    :return: Ioctl read operation number
-    """
-    return ioc(IOC_READ, DEVICE_ID_BASE, 0x20 + ev_type, lenght)
-
-
-def EVIOCGABS(code: int) -> int:
-    """
-    Get absolute value/limits
-    :param code: ABS event code
-    :return: Ioctl read operation number
-    """
-    return ior(DEVICE_ID_BASE, 0x40 + code, structures.input.ABSInfo)
-
-
-#
-# Linux input-event-codes.h
-#
-
-# Event types
-EV_ABS  =   int(0x03)
-
-
-KEY_MAX =   int(0x2ff)
-EV_MAX  =   int(0x1f)

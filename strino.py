@@ -36,5 +36,8 @@ if __name__ == '__main__':
         sys.path.append(BASE_DIR)
 
     if args.list:
-        for device in functions.system.get_all_devices_info():
-            print(device.get('name'))
+        for file in functions.system.get_all_devices_handlers():
+            with open(file, 'w') as f:
+                print(f.name)
+                print(functions.system.get_device_info(f))
+                print(functions.system.get_device_capabilities(f), end='\n\n')
