@@ -17,7 +17,6 @@ import globals.constants
 import structures.input
 import ctypes
 import fcntl
-import math
 import os
 
 
