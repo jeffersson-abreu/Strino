@@ -28,3 +28,24 @@ class InputId(ctypes.Structure):
         ('product', ctypes.c_uint16),
         ('version', ctypes.c_uint16),
     ]
+
+
+class ABSInfo(ctypes.Structure):
+    """
+    Struct ABSInfo - used by EVIOCGABS/EVIOCSABS ioctls
+
+    Note that input core does not clamp reported values to the
+    [minimum, maximum] limits, such task is left to userspace.
+
+    Resolution for main axes (ABS_X, ABS_Y, ABS_Z) is reported in
+    units per millimeter (units/mm), resolution for rotational axes
+    (ABS_RX, ABS_RY, ABS_RZ) is reported in units per radian.
+    """
+    _fields_ = [
+        ('value', ctypes.c_int32),          # latest reported value for the axis
+        ('minimum', ctypes.c_int32),        # specifies minimum value for the axis
+        ('maximum', ctypes.c_int32),        # specifies maximum value for the axis
+        ('fuzz', ctypes.c_int32),           # specifies fuzz value that is used to filter noise from the event stream
+        ('flat', ctypes.c_int32),           # values that are within this value will be discarded by joydev interface and reported as 0 instead
+        ('resolution', ctypes.c_int32),     # specifies resolution for the values reported for the axis
+    ]
