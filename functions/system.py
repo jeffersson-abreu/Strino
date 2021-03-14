@@ -64,14 +64,15 @@ def get_device_info(file: open) -> dict:
         pass
 
     return {
-        'bustype': f'0x{iid.bustype}',
-        'vendor': f'0x{iid.vendor}',
-        'product': f'0x{iid.product}',
-        'version': f'0x{iid.version}',
+        'bustype': iid.bustype,
+        'vendor': iid.vendor,
+        'product': iid.product,
+        'version': iid.version,
         'name': name.value.decode(),
         'phys': phys.value.decode(),
         'unique': uniq.value.decode(),
-        'handler': file.name
+        'handler': file.name,
+        'events': get_device_capabilities(file)
     }
 
 
