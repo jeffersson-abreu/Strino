@@ -14,6 +14,7 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 
+import structures.time
 import ctypes
 
 
@@ -48,4 +49,16 @@ class ABSInfo(ctypes.Structure):
         ('fuzz', ctypes.c_int32),           # specifies fuzz value that is used to filter noise from the event stream
         ('flat', ctypes.c_int32),           # values that are within this value will be discarded by joydev interface and reported as 0 instead
         ('resolution', ctypes.c_int32),     # specifies resolution for the values reported for the axis
+    ]
+
+
+class InputEvent(ctypes.Structure):
+    """
+    Struct input_event represents a device input
+    """
+    _fields_ = [
+        ("time", structures.time.Timeval),  # Time of the event
+        ("type", ctypes.c_uint16),          # Event type
+        ("code", ctypes.c_uint16),          # Event code
+        ("value", ctypes.c_int32),          # Event value
     ]
