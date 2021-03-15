@@ -17,5 +17,6 @@ __all__ = [
     'glob',
     'input',
     'ecodes',
-    'llevel'
+    'llevel',
+    'uinput'
 ]

@@ -26,7 +26,7 @@ import os
 
 
 # noinspection PyTypeChecker
-def get_device_info(file: open) -> dict:
+def get_device_info(file: open, evnames=False) -> dict:
     """
     Get Device informations by a given file descriptor
     :param file: A file opened with built-in open function
@@ -72,7 +72,7 @@ def get_device_info(file: open) -> dict:
         'phys': phys.value.decode(),
         'unique': uniq.value.decode(),
         'handler': file.name,
-        'events': get_device_capabilities(file)
+        'events': get_device_capabilities(file, evnames=evnames)
     }
 
 
@@ -125,9 +125,10 @@ def test_bit(bitmask: bytes, bit: int) -> int:
 
 
 # noinspection PyTypeChecker
-def get_device_capabilities(file: open) -> dict:
+def get_device_capabilities(file: open, evnames=False) -> dict:
     """
     Return all device events supported and keys related
+    :param evnames: Resolve the event name Eg: 0x00 -> EV_SYNC
     :param file: A file opened with built-in open function
     :return: Dict with device capabilities
     """
@@ -158,13 +159,20 @@ def get_device_capabilities(file: open) -> dict:
                 # just break the loop and keep going
                 break
 
+            keyname = ev_type
+
+            if evnames:
+                for event_name, event_code in constants.ecodes.event_types.items():
+                    if event_code == ev_type:
+                        keyname = event_name
+
             # if no error occurs so add the event key
-            capabilities[ev_type] = []
+            capabilities[keyname] = []
 
             for ev_code in range(0, constants.ecodes.KEY_MAX):
                 if test_bit(cd_bits.raw, ev_code):
 
-                    if ev_type == constants.ecodes.EV_ABS:
+                    if ev_type == constants.ecodes.event_types['EV_ABS']:
                         abs_info = structures.input.ABSInfo()
 
                         # At this point we just check if event type is EV_ABS so clean the memory
@@ -185,11 +193,11 @@ def get_device_capabilities(file: open) -> dict:
                         # Get the event list and save the ABS
                         # dict in a tuple numered by event...
                         # Eg: (00, _abs)
-                        event = capabilities[ev_type]
+                        event = capabilities[keyname]
                         event.append((ev_code, _abs))
 
                     else:
                         # Just append the event code to event type key
-                        capabilities[ev_type].append(ev_code)
+                        capabilities[keyname].append(ev_code)
 
     return capabilities
