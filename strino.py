@@ -13,10 +13,13 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
+import virtualize.devices
 import functions.system
 import argparse
 import sys
 import os
+
+from time import sleep
 
 
 if __name__ == '__main__':
