@@ -19,6 +19,12 @@ EV_MAX = int(0x1f)
 # Maximun synchronization events
 KEY_MAX = int(0x2ff)
 
+# Maximun abs events
+ABS_MAX = int(0x3f)
+
+# Maximun SYN events
+SYN_MAX = int(0xf)
+
 event_types = {
     'EV_SYN':		   0x00,
     'EV_KEY':		   0x01,

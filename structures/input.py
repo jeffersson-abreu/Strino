@@ -74,3 +74,10 @@ class UinputSetup(ctypes.Structure):
         ("ff_effects_max", ctypes.c_uint32),
     ]
 
+
+__all__ = [
+    'InputId',
+    'ABSInfo',
+    'InputEvent',
+    'UinputSetup'
+]

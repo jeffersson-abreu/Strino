@@ -26,15 +26,12 @@ import os
 
 
 # noinspection PyTypeChecker
-def get_device_info(file: open, evnames=False) -> dict:
+def get_device_info(file: open) -> dict:
     """
     Get Device informations by a given file descriptor
     :param file: A file opened with built-in open function
     :return: Dict containing informations about device handled by file
     """
-
-    # Needed to ioctl calls
-    fd = file.fileno()
 
     # Create the string buffer to make future ioctl calls
     max_name_size = ctypes.sizeof(constants.input.MAX_NAME_SIZE)
@@ -48,18 +45,18 @@ def get_device_info(file: open, evnames=False) -> dict:
     ctypes.memset(ctypes.addressof(iid), 0, ctypes.sizeof(iid))
 
     # Get the file ID (type, vendor, product, version)
-    fcntl.ioctl(fd, constants.input.EVIOCGID, iid)
+    fcntl.ioctl(file, constants.input.EVIOCGID, iid)
 
     # Get the device name
-    fcntl.ioctl(fd, constants.input.EVIOCGNAME, name)
+    fcntl.ioctl(file, constants.input.EVIOCGNAME, name)
 
     # Some devices do not have a physical topology associated with them
-    fcntl.ioctl(fd, constants.input.EVIOCGPHYS, phys)
+    fcntl.ioctl(file, constants.input.EVIOCGPHYS, phys)
 
     try:
         # Some kernels have started reporting bluetooth controller MACs as phys.
         # This lets us get the real physical address. As with phys, it may be blank.
-        fcntl.ioctl(fd, constants.input.EVIOCGUNIQ, uniq)
+        fcntl.ioctl(file, constants.input.EVIOCGUNIQ, uniq)
     except IOError:
         pass
 
@@ -72,7 +69,7 @@ def get_device_info(file: open, evnames=False) -> dict:
         'phys': phys.value.decode(),
         'unique': uniq.value.decode(),
         'handler': file.name,
-        'events': get_device_capabilities(file, evnames=evnames)
+        'events': get_device_capabilities(file)
     }
 
 
@@ -125,10 +122,9 @@ def test_bit(bitmask: bytes, bit: int) -> int:
 
 
 # noinspection PyTypeChecker
-def get_device_capabilities(file: open, evnames=False) -> dict:
+def get_device_capabilities(file: open) -> dict:
     """
     Return all device events supported and keys related
-    :param evnames: Resolve the event name Eg: 0x00 -> EV_SYNC
     :param file: A file opened with built-in open function
     :return: Dict with device capabilities
     """
@@ -143,7 +139,7 @@ def get_device_capabilities(file: open, evnames=False) -> dict:
     # Fill 0 (clean) the memory space of ev_bits and call ioctl to get bits of
     # all event codes suported by device so we can build the device capabilities
     ctypes.memset(ctypes.addressof(ev_bits), 0, ctypes.sizeof(ev_bits))
-    fcntl.ioctl(file, constants.input.EVIOCGBIT(0, ctypes.sizeof(ev_bits)), ev_bits)
+    fcntl.ioctl(file, constants.input.EVIOCGBIT(0, ev_bits), ev_bits)
 
     # Build a dictionary of the device's capabilities
     for ev_type in range(0, constants.ecodes.EV_MAX):
@@ -153,18 +149,13 @@ def get_device_capabilities(file: open, evnames=False) -> dict:
                 # Fill 0 (clean) the momory space of cd_bits and call ioctl to get all
                 # related event codes so we can build a list of codes handled by event
                 ctypes.memset(ctypes.addressof(cd_bits), 0, ctypes.sizeof(cd_bits))
-                fcntl.ioctl(file, constants.input.EVIOCGBIT(ev_type, ctypes.sizeof(cd_bits)), cd_bits)
+                fcntl.ioctl(file, constants.input.EVIOCGBIT(ev_type, cd_bits), cd_bits)
             except OSError:
                 # Sometime an argument error occurs we
                 # just break the loop and keep going
                 break
 
             keyname = ev_type
-
-            if evnames:
-                for event_name, event_code in constants.ecodes.event_types.items():
-                    if event_code == ev_type:
-                        keyname = event_name
 
             # if no error occurs so add the event key
             capabilities[keyname] = []
@@ -184,7 +175,7 @@ def get_device_capabilities(file: open, evnames=False) -> dict:
                         _abs = {
                             'value': abs_info.value,
                             'minimum': abs_info.minimum,
-                            'maximun': abs_info.maximum,
+                            'maximum': abs_info.maximum,
                             'fuzz': abs_info.fuzz,
                             'flat': abs_info.flat,
                             'resolution': abs_info.resolution

@@ -22,7 +22,7 @@ import ctypes
 MAX_NAME_SIZE = ctypes.create_string_buffer(256)
 
 # Device id base generator
-DEVICE_ID_BASE = ord('E')
+DEVICE_ID_BASE = 'E'
 
 # Get devices ID
 EVIOCGID = constants.llevel.ior(DEVICE_ID_BASE, 0x02, structures.input.InputId)
@@ -44,7 +44,7 @@ def EVIOCGBIT(ev_type, lenght) -> int:
     :param lenght: The length of string buffer (ctypes)
     :return: Ioctl read operation number
     """
-    return constants.llevel.ioc(constants.llevel.IOC_READ, DEVICE_ID_BASE, 0x20 + ev_type, lenght)
+    return constants.llevel.ior(DEVICE_ID_BASE, 0x20 + ev_type, lenght)
 
 
 def EVIOCGABS(code: int) -> int:
@@ -54,3 +54,12 @@ def EVIOCGABS(code: int) -> int:
     :return: Ioctl read operation number
     """
     return constants.llevel.ior(DEVICE_ID_BASE, 0x40 + code, structures.input.ABSInfo)
+
+
+def EVIOCSABS(code: int) -> int:
+    """
+    Set absolute value/limits
+    :param code: ABS event code
+    :return: Ioctl write operation number
+    """
+    return constants.llevel.iow(DEVICE_ID_BASE, 0xc0 + code, structures.input.ABSInfo)

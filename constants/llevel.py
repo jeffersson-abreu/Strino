@@ -13,7 +13,7 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-import ctypes
+from ctypes import *
 
 # The original linux ioctl numbering scheme was just a general
 # "anything goes" setup, where more or less random numbers were
@@ -23,56 +23,68 @@ import ctypes
 # ioctl numbering, and also trying to be compatible with OSF/1 in
 # the process. I'd like to clean it up for the i386 as well, but
 # it's so painful recognizing both the new and the old numbers..
-_IOC_NRBITS     =   8
-_IOC_TYPEBITS   =   8
-_IOC_SIZEBITS   =   14
-_IOC_DIRBITS    =   2
+_IOC_NRBITS = 8
+_IOC_TYPEBITS = 8
 
-_IOC_NRMASK     =   (1 << _IOC_NRBITS) - 1
-_IOC_TYPEMASK   =   (1 << _IOC_TYPEBITS) - 1
-_IOC_SIZEMASK   =   (1 << _IOC_SIZEBITS) - 1
-_IOC_DIRMASK    =   (1 << _IOC_DIRBITS) - 1
-
-_IOC_NRSHIFT    =   0
-_IOC_TYPESHIFT  =   _IOC_NRSHIFT + _IOC_NRBITS
-_IOC_SIZESHIFT  =   _IOC_TYPESHIFT + _IOC_TYPEBITS
-_IOC_DIRSHIFT   =   _IOC_SIZESHIFT + _IOC_SIZEBITS
-
-# Direction bits _IOC_NONE could be 0, but OSF/1 gives it a bit.
-# And this turns out useful to catch old ioctl numbers in header
-# files for us.
-IOC_NONE    =   0
-IOC_WRITE   =   1
-IOC_READ    =   2
+_IOC_NRSHIFT = 0
+_IOC_TYPESHIFT = _IOC_NRSHIFT + _IOC_NRBITS
+_IOC_SIZESHIFT = _IOC_TYPESHIFT + _IOC_TYPEBITS
 
 
-def ioc(dr, tp, nr, size):
-    assert dr <= _IOC_DIRMASK, dr
-    assert tp <= _IOC_TYPEMASK, tp
-    assert nr <= _IOC_NRMASK, nr
-    assert size <= _IOC_SIZEMASK, size
-    return (dr << _IOC_DIRSHIFT) | (tp << _IOC_TYPESHIFT) | (nr << _IOC_NRSHIFT) | (size << _IOC_SIZESHIFT)
+_IOC_NONE = 0
+_IOC_WRITE = 1
+_IOC_READ  = 2
+_IOC_SIZEBITS = 14
+_IOC_DIRBITS = 2
+
+_IOC_DIRSHIFT = _IOC_SIZESHIFT + _IOC_SIZEBITS
 
 
-def ioc_typecheck(t):
-    result = ctypes.sizeof(t)
-    assert result <= _IOC_SIZEMASK, result
-    return result
+def _IOC(dir_, type_, nr, size):
+    return (
+        c_int32(dir_ << _IOC_DIRSHIFT).value |
+        c_int32(ord(type_) << _IOC_TYPESHIFT).value |
+        c_int32(nr << _IOC_NRSHIFT).value |
+        c_int32(size << _IOC_SIZESHIFT).value)
 
 
-# Used to create numbers
-def io(t, nr):
-    return ioc(IOC_NONE, t, nr, 0)
+def _IOC_TYPECHECK(t):
+    return sizeof(t)
 
 
-# Used to decode then
-def iow(t, nr, size):
-    return ioc(IOC_WRITE, t, nr, ioc_typecheck(size))
+def _IO(type_, nr):
+    return _IOC(_IOC_NONE, type_, nr, 0)
 
 
-def ior(t, nr, size):
-    return ioc(IOC_READ, t, nr, ioc_typecheck(size))
+def _IOW(type_, nr, size):
+    return _IOC(_IOC_WRITE, type_, nr, _IOC_TYPECHECK(size))
 
 
-def iowr(t, nr, size):
-    return ioc(IOC_READ | IOC_WRITE, t, nr, ioc_typecheck(size))
+def _IOR(type_, nr, size):
+    return _IOC(_IOC_READ, type_, nr, _IOC_TYPECHECK(size))
+
+
+def _IOWR(type_, nr, size):
+    return _IOC(_IOC_READ | _IOC_WRITE, type_, nr, _IOC_TYPECHECK(size))
+
+
+def io(type_, nr):
+    return _IO(type_, nr)
+
+
+def ioc(dir_, type_, nr, size):
+    return _IOC(dir_, type_, nr, size)
+
+
+def ior(type_, nr, size):
+    return _IOR(type_, nr, size)
+
+
+def iow(type_, nr, size):
+    return _IOW(type_, nr, size)
+
+
+def iowr(type_, nr, size):
+    return _IOWR(type_, nr, size)
+
+

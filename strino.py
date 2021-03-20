@@ -15,11 +15,16 @@
 
 import virtualize.devices
 import functions.system
+from time import sleep
 import argparse
 import sys
 import os
 
-from time import sleep
+
+def get_handler_position(path):
+    basename = os.path.basename(path)
+    position = basename.strip('event')
+    return int(position)
 
 
 if __name__ == '__main__':
@@ -39,8 +44,11 @@ if __name__ == '__main__':
         sys.path.append(BASE_DIR)
 
     if args.list:
-        for file in functions.system.get_all_devices_handlers():
-            with open(file, 'w') as f:
-                print(f.name)
-                print(functions.system.get_device_info(f))
-                print(functions.system.get_device_capabilities(f), end='\n\n')
+        with open('/dev/input/event7', 'rb') as handler:
+            device_info = functions.system.get_device_info(handler)
+            device = virtualize.devices.VirtualDevice(device_info)
+
+            try:
+                sleep(100000)
+            except KeyboardInterrupt:
+                device.destroy()
