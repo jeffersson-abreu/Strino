@@ -14,7 +14,8 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import virtualize.devices
-import functions
+import functions.utils
+import functions.system
 import constants
 import argparse
 import logging

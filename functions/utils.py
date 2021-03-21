@@ -6,14 +6,13 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License
-
-# for more details.
+# GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.
 #
 # Author: Jeffersson Abreu (ctw6av)
+
 
 import re
 
@@ -69,3 +68,10 @@ def natural_sort(_list: list, keyword=None) -> list:
     :return: A list sorted.
     """
     return sorted(_list, key=lambda key: order_by_alphanum(key, keyword=keyword))
+
+
+__all__ = [
+    'natural_sort',
+    'order_by_alphanum',
+    'to_int'
+]
