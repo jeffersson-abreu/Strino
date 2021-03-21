@@ -26,8 +26,8 @@ import os
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems with Strino.')
-    parser.add_argument('--list', help='List of available devices to share.', action="store_true")
-    parser.add_argument('--verbose', help='Increase the output verbosity', action="store_true")
+    parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
+    parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true")
     args = parser.parse_args()
 
     # print(args)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         print(constants.glob.list_header)
 
         devices = functions.utils.natural_sort(devices, keyword='handler')
-        print(f"{'ID':<5} {'Handler':<10} {'Device name'}")
+        print(f"{'Handler':<10} {'Device name'}")
 
-        for pos, device in enumerate(devices):
-            print(f"{pos:<5} {os.path.basename(device.get('handler')):<10} {device.get('name')}")
+        for device in devices:
+            print(f"{os.path.basename(device.get('handler')):<10} {device.get('name')}")
