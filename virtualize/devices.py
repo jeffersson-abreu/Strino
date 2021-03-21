@@ -78,6 +78,12 @@ class VirtualDevice(object):
                     fcntl.ioctl(self.fd, constants.uinput.UI_SET_KEYBIT, key)
                 continue
 
+            if event == constants.ecodes.event_types.get("EV_SW"):
+                constants.glob.logger.info('Setting up event EV_SW')
+                for key in codes:
+                    fcntl.ioctl(self.fd, constants.uinput.UI_SET_SWBIT, key)
+                continue
+
             if event == constants.ecodes.event_types.get("EV_REL"):
                 constants.glob.logger.info('Setting up event EV_REL')
 
