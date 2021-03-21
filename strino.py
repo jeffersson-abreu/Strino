@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     if args.list:
         import constants.ecodes
-        with open('/dev/input/event0', 'rb') as handler:
+        with open('/dev/input/event1', 'rb') as handler:
             device_info = functions.system.get_device_info(handler)
             # print(device_info)
             device = virtualize.devices.VirtualDevice(device_info)

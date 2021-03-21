@@ -14,6 +14,7 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import constants.uinput
+import functions.system
 import constants.ecodes
 import structures.input
 import constants.glob
@@ -117,6 +118,11 @@ class VirtualDevice(object):
                     fcntl.ioctl(self.fd, constants.uinput.UI_ABS_SETUP, uinput_abs_setup)
 
                 continue
+
+        # Setup the device prop bits
+        for bit in range(constants.input.INPUT_PROP_CNT):
+            if functions.system.test_bit(self.info.get('prop'), bit):
+                fcntl.ioctl(self.fd, constants.uinput.UI_SET_PROPBIT, bit)
 
         # This ioctl sets parameters for the input device to be created
         constants.glob.logger.info('Writting setup to kernel')

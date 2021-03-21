@@ -36,6 +36,14 @@ EVIOCGPHYS = constants.llevel.ior(DEVICE_ID_BASE, 0x07, MAX_NAME_SIZE)
 # Get devices unique identifier
 EVIOCGUNIQ = constants.llevel.ior(DEVICE_ID_BASE, 0x08, MAX_NAME_SIZE)
 
+INPUT_PROP_MAX = 0x1f
+INPUT_PROP_CNT = (INPUT_PROP_MAX + 1)
+
+
+# Get device properties
+def EVIOCGPROP(length):
+    return constants.llevel.ior(DEVICE_ID_BASE, 0x09, length)
+
 
 def EVIOCGBIT(ev_type, lenght) -> int:
     """

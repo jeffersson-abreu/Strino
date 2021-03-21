@@ -42,6 +42,9 @@ def get_device_info(file: open) -> dict:
     phys = ctypes.create_string_buffer(max_name_size)
     uniq = ctypes.create_string_buffer(max_name_size)
 
+    prop = ctypes.create_string_buffer(constants.input.INPUT_PROP_CNT // 8)
+    fcntl.ioctl(file, constants.input.EVIOCGPROP(prop), prop)
+
     # Instantiate a struct input_id and and
     # clean (fill 0) memory of it's address
     iid = structures.input.InputId()
@@ -74,6 +77,7 @@ def get_device_info(file: open) -> dict:
         'phys': phys.value.decode(),
         'unique': uniq.value.decode(),
         'handler': file.name,
+        'prop': prop.raw,
         'events': get_device_capabilities(file)
     }
 
