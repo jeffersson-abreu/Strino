@@ -14,9 +14,8 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import constants.llevel
+import structures.input
 import ctypes
-
-UINPUT_MAX_NAME_SIZE = 80
 
 # ioctl
 UINPUT_IOCTL_BASE   =   'U'
@@ -24,17 +23,17 @@ UI_DEV_CREATE       =   constants.llevel.io(UINPUT_IOCTL_BASE, 1)
 UI_DEV_DESTROY      =   constants.llevel.io(UINPUT_IOCTL_BASE, 2)
 
 
-def UI_DEV_SETUP(struct):
-    """
-    This function was adapted from C code. It's not 'pythonic' to
-    use lambda to assign values so I had to adapt it to a function
+# This function was adapted from C code. It's not 'pythonic' to
+# use lambda to assign values so I had to adapt it to a function
+#
+# UI_DEV_SETUP - Set device parameters for setup
+# This ioctl sets parameters for the input device to be created.  It
+# supersedes the old "struct uinput_user_dev" method, which wrote this data
+# via write(). To actually set the absolute axes UI_ABS_SETUP should be used.
+UI_DEV_SETUP = constants.llevel.iow(UINPUT_IOCTL_BASE, 3, structures.input.UinputSetup)
 
-    UI_DEV_SETUP - Set device parameters for setup
-    This ioctl sets parameters for the input device to be created.  It
-    supersedes the old "struct uinput_user_dev" method, which wrote this data
-    via write(). To actually set the absolute axes UI_ABS_SETUP should be used.
-    """
-    return constants.llevel.iow(UINPUT_IOCTL_BASE, 3, struct)
+
+UI_ABS_SETUP = constants.llevel.iow(UINPUT_IOCTL_BASE, 4, structures.input.UinputAbsSetup)
 
 
 UI_SET_EVBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 100, ctypes.c_int)

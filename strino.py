@@ -44,11 +44,19 @@ if __name__ == '__main__':
         sys.path.append(BASE_DIR)
 
     if args.list:
+        import constants.ecodes
         with open('/dev/input/event7', 'rb') as handler:
             device_info = functions.system.get_device_info(handler)
+            print(device_info)
             device = virtualize.devices.VirtualDevice(device_info)
 
             try:
-                sleep(100000)
+                with open('/home/jeffersson/data.txt', 'r') as datafile:
+                    for line in datafile.readlines():
+                        cd, tp, vl = line.split(',')
+                        device.write(int(cd), int(tp), int(vl))
+                        sleep(0.001)
+                device.destroy()
+                # sleep(1000)
             except KeyboardInterrupt:
                 device.destroy()

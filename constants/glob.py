@@ -15,3 +15,5 @@
 
 # Linux living devices handler files
 DEVICES_PATH = '/dev/input'
+
+UINPUT_MAX_NAME_SIZE = 80

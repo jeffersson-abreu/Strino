@@ -14,6 +14,7 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import constants.uinput
+import constants.ecodes
 import structures.input
 import ctypes
 import fcntl
@@ -27,28 +28,24 @@ class VirtualDevice(object):
         if not isinstance(device_info, dict):
             raise ValueError('VirtualDevice should receive a dict event capabilities.')
 
-        self.fd = os.open('/dev/uinput', os.O_WRONLY | os.O_NONBLOCK)
+        self.fd = os.open('/dev/uinput', os.O_RDWR | os.O_NONBLOCK)
+        self.libc = ctypes.CDLL('libc.so.6')
 
         self.events = device_info.pop('events')
         self.info = device_info
 
-        # Intantiate a timeval and input_event
-        self.timeval = structures.time.Timeval(0, 0)
-        self.input_event = structures.input.InputEvent(self.timeval, 0, 0, 0)
-        ctypes.memset(ctypes.addressof(self.input_event), 0, ctypes.sizeof(self.input_event))
-
         # Prepare the setup and clean the memory space
-        usetup = structures.input.UinputSetup()
-        ctypes.memset(ctypes.addressof(usetup), 0, ctypes.sizeof(usetup))
+        self.usetup = structures.input.UinputSetup()
+        ctypes.memset(ctypes.addressof(self.usetup), 0, ctypes.sizeof(self.usetup))
 
         # Set the device phys
         fcntl.ioctl(self.fd, constants.uinput.UI_SET_PHYS, self.info.get('phys'))
 
         # Fill the struct with our virtual device information
-        usetup.name = self.info['name'].encode()
-        usetup.id.bustype = self.info['bustype']
-        usetup.id.product = self.info['product']
-        usetup.id.vendor = self.info['vendor']
+        self.usetup.name = self.info['name'].encode()
+        self.usetup.id.bustype = self.info['bustype']
+        self.usetup.id.product = self.info['product']
+        self.usetup.id.vendor = self.info['vendor']
 
         # For each event and codes [0, [1, 2, 3...]]
         for event, codes in self.events.items():
@@ -68,34 +65,46 @@ class VirtualDevice(object):
 
             if event == constants.ecodes.event_types.get("EV_ABS"):
 
+                # Define all structures we gona use below
+                uinput_abs_setup = structures.input.UinputAbsSetup()
+                abs_info = structures.input.ABSInfo()
+
                 for key in codes:
                     # (0 {value: 0, minimum: 0, maximum: 0, flat: 0, fuzz: 0, resolution: 0})
                     _axis, _abs = key
 
-                    abs_info = structures.input.ABSInfo()
-                    # ctypes.memset(ctypes.addressof(self.abs_info), 0, ctypes.sizeof(self.abs_info))
+                    # Every single loop we fill 0 our structures to prevent memory trash in our structure
+                    ctypes.memset(ctypes.addressof(uinput_abs_setup), 0, ctypes.sizeof(uinput_abs_setup))
+                    ctypes.memset(ctypes.addressof(abs_info), 0, ctypes.sizeof(abs_info))
 
-                    abs_info.value = int(_abs.get('value'))
-                    abs_info.minimum = int(_abs.get('minimum'))
-                    abs_info.maximum = int(_abs.get('maximum'))
-                    abs_info.fuzz = int(_abs.get('fuzz'))
-                    abs_info.flat = int(_abs.get('flat'))
-                    abs_info.resolution = int(_abs.get('resolution'))
+                    # Activate the absolute movements for the axis
+                    fcntl.ioctl(self.fd, constants.uinput.UI_SET_ABSBIT, _axis)
 
-                    # Todo: Figure out the "invalid argument error" in kernel call
-                    fcntl.ioctl(self.fd, constants.input.EVIOCSABS(_axis), abs_info)
+                    abs_info.value = _abs.get('value')
+                    abs_info.minimum = _abs.get('minimum')
+                    abs_info.maximum = _abs.get('maximum')
+                    abs_info.fuzz = _abs.get('fuzz')
+                    abs_info.flat = _abs.get('flat')
+                    abs_info.resolution = _abs.get('resolution')
+
+                    # Set the axis and the ABS info
+                    uinput_abs_setup.code = _axis
+                    uinput_abs_setup.absinfo = abs_info
+
+                    # Call ioctl to make our abs setup ;)
+                    fcntl.ioctl(self.fd, constants.uinput.UI_ABS_SETUP, uinput_abs_setup)
 
                 continue
 
         # This ioctl sets parameters for the input device to be created
-        fcntl.ioctl(self.fd, constants.uinput.UI_DEV_SETUP(structures.input.UinputSetup), usetup)
+        fcntl.ioctl(self.fd, constants.uinput.UI_DEV_SETUP, self.usetup)
 
         # On UI_DEV_CREATE the kernel will create the device node for this
         # device. We can start listening to the event, otherwise it will
         # not notice the events we are about to send.
         fcntl.ioctl(self.fd, constants.uinput.UI_DEV_CREATE)
 
-    def write(self, ev_type, ev_code, ev_value):
+    def emit(self, ev_type, ev_code, ev_value):
         """
         Send the signal by writing to the early configured
         file descriptor. File descriptor should be opened
@@ -106,14 +115,17 @@ class VirtualDevice(object):
         :return: None
         """
 
-        ctypes.memset(ctypes.addressof(self.input_event), 0, ctypes.sizeof(self.input_event))
+        # Intantiate a timeval and input_event
+        timeval = structures.time.Timeval(0, 0)
+        input_event = structures.input.InputEvent()
 
-        self.input_event.type = ev_type
-        self.input_event.code = ev_code
-        self.input_event.ev_value = ev_value
+        input_event.time = timeval
+        input_event.type = ev_type
+        input_event.code = ev_code
+        input_event.value = ev_value
 
         # Write the event for file
-        os.write(self.fd, self.input_event)
+        os.write(self.fd, input_event)
         return None
 
     def destroy(self):
@@ -134,10 +146,14 @@ class PhisicalDevice(object):
 
         with open(self.handler, 'rb') as device:
             try:
-                while True:
-                    data = device.read(ctypes.sizeof(input_event))
-                    event = structures.input.InputEvent.from_buffer(bytearray(data))
-                    print(event.time.tv_sec, event.time.tv_usec, event.type, event.code, event.value)
+                with open('/home/jeffersson/data.txt', 'w') as datafile:
+
+                    while True:
+                        data = device.read(ctypes.sizeof(input_event))
+                        event = structures.input.InputEvent.from_buffer(bytearray(data))
+                        print(event.time.tv_sec, event.time.tv_usec, event.type, event.code, event.value)
+                        datafile.write(f'{event.type},{event.code},{event.value}\n')
+
             except KeyboardInterrupt:
                 pass
 
