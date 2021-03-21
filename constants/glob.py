@@ -14,7 +14,6 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import logging
-import sys
 
 # Linux living devices handler files
 DEVICES_PATH = '/dev/input'
@@ -23,12 +22,21 @@ UINPUT_MAX_NAME_SIZE = 80
 
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
+format_string = '[%(asctime)s][%(levelname)s] - %(message)s'
+format_date = '%d-%m-%y %H:%M:%S'
 
-formatter = logging.Formatter('[%(asctime)s][%(levelname)s] - %(message)s', datefmt='%d-%m-%y %H:%M:%S')
-handler.setFormatter(formatter)
+logging.basicConfig(
+    filename='/home/jeffersson/strino.log',
+    format=format_string,
+    datefmt=format_date,
+    level=logging.INFO,
+    filemode='w'
+)
 
-logger.addHandler(handler)
+
+list_header = """
+    \rBellow a list of all devices found on the system, if your pretended device 
+    \rwas not in the list so verify if the device is really connected in a working 
+    \rUSB port. If your device is not USB may it's not recognized by the system. 
+"""

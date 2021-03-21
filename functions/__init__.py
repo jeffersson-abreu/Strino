@@ -14,5 +14,6 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 __all__ = [
-    'system'
+    'system',
+
 ]

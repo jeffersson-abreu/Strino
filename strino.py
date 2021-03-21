@@ -15,24 +15,22 @@
 
 import virtualize.devices
 import functions.system
-from time import sleep
+import functions.utils
+import constants.glob
 import argparse
+import logging
 import sys
 import os
 
 
-def get_handler_position(path):
-    basename = os.path.basename(path)
-    position = basename.strip('event')
-    return int(position)
-
-
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems.')
-    parser.add_argument('list', type=bool, help='List of available devices to share.')
+    parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems with Strino.')
+    parser.add_argument('--list', help='List of available devices to share.', action="store_true")
+    parser.add_argument('--verbose', help='Increase the output verbosity', action="store_true")
     args = parser.parse_args()
 
+    # print(args)
     # Project name. Yes I know it can be set in a string... anyway ;)
     PROJECT_NAME = os.path.dirname(os.path.abspath(__file__))
 
@@ -43,21 +41,20 @@ if __name__ == '__main__':
     if BASE_DIR not in sys.path:
         sys.path.append(BASE_DIR)
 
-    if args.list:
-        for x in range(0, 18):
-            with open(f'/dev/input/event{x}', 'rb') as handler:
-                device_info = functions.system.get_device_info(handler)
-                # print(device_info)
-                device = virtualize.devices.VirtualDevice(device_info)
+    if args.verbose:
+        # Add a handler and set the default output to stdout
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
 
-                try:
-                    # with open('/home/jeffersson/data.txt', 'r') as datafile:
-                    #     for line in datafile.readlines():
-                    #         cd, tp, vl = line.split(',')
-                    #         device.write(int(cd), int(tp), int(vl))
-                    #         sleep(0.001)
-                    # device.destroy()
-                    print(f"Device {x}", end='\n')
-                    sleep(1000)
-                except KeyboardInterrupt:
-                    device.destroy()
+        constants.glob.logger.addHandler(handler)
+        constants.glob.logger.error('Verbose output is set to true')
+
+    if args.list:
+        devices = functions.system.get_all_devices_info()
+        print(constants.glob.list_header)
+
+        devices = functions.system.natural_sort(devices, keyword='handler')
+        print(f"{'ID':<5} {'Handler':<10} {'Device name'}")
+
+        for pos, device in enumerate(devices):
+            print(f"{pos:<5} {os.path.basename(device.get('handler')):<10} {device.get('name')}")

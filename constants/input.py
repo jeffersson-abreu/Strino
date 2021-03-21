@@ -36,6 +36,7 @@ EVIOCGPHYS = constants.llevel.ior(DEVICE_ID_BASE, 0x07, MAX_NAME_SIZE)
 # Get devices unique identifier
 EVIOCGUNIQ = constants.llevel.ior(DEVICE_ID_BASE, 0x08, MAX_NAME_SIZE)
 
+# Max number of device properties
 INPUT_PROP_MAX = 0x1f
 INPUT_PROP_CNT = (INPUT_PROP_MAX + 1)
 

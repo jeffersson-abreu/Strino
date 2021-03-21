@@ -22,7 +22,6 @@ import constants.glob
 
 import ctypes
 import fcntl
-import json
 import os
 
 
@@ -82,7 +81,7 @@ def get_device_info(file: open) -> dict:
     }
 
 
-def get_all_devices_handlers() -> set:
+def get_all_devices_handlers() -> list:
     """
     Get all devices file handlers living in linux /dev/input folder
     :return: A set of event handlers filename
@@ -102,7 +101,7 @@ def get_all_devices_handlers() -> set:
                     )
                 )
 
-    return file_handlers
+    return list(file_handlers)
 
 
 def get_all_devices_info() -> list:
@@ -211,4 +210,5 @@ def get_device_capabilities(file: open) -> dict:
             if key == code:
                 constants.glob.logger.info(f'Found event {name}')
 
+    constants.glob.logger.info(f'End device event reports\n')
     return capabilities
