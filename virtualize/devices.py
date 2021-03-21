@@ -59,6 +59,18 @@ class VirtualDevice(object):
             if event == constants.ecodes.event_types.get("EV_SYN"):
                 constants.glob.logger.info('Setting up event EV_SYN')
 
+            if event == constants.ecodes.event_types.get("EV_MSC"):
+                constants.glob.logger.info('Setting up event EV_MSC')
+                for key in codes:
+                    fcntl.ioctl(self.fd, constants.uinput.UI_SET_MSCBIT, key)
+                continue
+
+            if event == constants.ecodes.event_types.get("EV_LED"):
+                constants.glob.logger.info('Setting up event EV_LED')
+                for key in codes:
+                    fcntl.ioctl(self.fd, constants.uinput.UI_SET_LEDBIT, key)
+                continue
+
             if event == constants.ecodes.event_types.get("EV_KEY"):
                 constants.glob.logger.info('Setting up event EV_KEY')
                 for key in codes:
