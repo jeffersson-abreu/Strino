@@ -51,6 +51,8 @@ class VirtualDevice(object):
         self.usetup.id.product = self.info['product']
         self.usetup.id.vendor = self.info['vendor']
 
+        # TODO: set FF bits
+
         # For each event and codes [0, [1, 2, 3...]]
         for event, codes in self.events.items():
 
@@ -76,6 +78,10 @@ class VirtualDevice(object):
                 constants.glob.logger.info('Setting up event EV_KEY')
                 for key in codes:
                     fcntl.ioctl(self.fd, constants.uinput.UI_SET_KEYBIT, key)
+                continue
+
+            if event == constants.ecodes.event_types.get("EV_SND"):
+                constants.glob.logger.info('Not supported EV_SND yet!')
                 continue
 
             if event == constants.ecodes.event_types.get("EV_SW"):

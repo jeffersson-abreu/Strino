@@ -36,14 +36,14 @@ UI_DEV_SETUP = constants.llevel.iow(UINPUT_IOCTL_BASE, 3, structures.input.Uinpu
 UI_ABS_SETUP = constants.llevel.iow(UINPUT_IOCTL_BASE, 4, structures.input.UinputAbsSetup)
 
 
-UI_SET_EVBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 100, ctypes.c_int)
-UI_SET_KEYBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 101, ctypes.c_int)
-UI_SET_RELBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 102, ctypes.c_int)
-UI_SET_ABSBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 103, ctypes.c_int)
-UI_SET_MSCBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 104, ctypes.c_int)
-UI_SET_LEDBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 105, ctypes.c_int)
-UI_SET_SNDBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 106, ctypes.c_int)
-UI_SET_FFBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 107, ctypes.c_int)
-UI_SET_PHYS     =   constants.llevel.iow(UINPUT_IOCTL_BASE, 108, ctypes.c_char_p)
-UI_SET_SWBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 109, ctypes.c_int)
-UI_SET_PROPBIT  =   constants.llevel.iow(UINPUT_IOCTL_BASE, 110, ctypes.c_int)
+UI_SET_EVBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 100, ctypes.c_int)      # OK
+UI_SET_KEYBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 101, ctypes.c_int)      # OK
+UI_SET_RELBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 102, ctypes.c_int)      # OK
+UI_SET_ABSBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 103, ctypes.c_int)      # OK
+UI_SET_MSCBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 104, ctypes.c_int)      # OK
+UI_SET_LEDBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 105, ctypes.c_int)      # OK
+UI_SET_SNDBIT   =   constants.llevel.iow(UINPUT_IOCTL_BASE, 106, ctypes.c_int)      #
+UI_SET_FFBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 107, ctypes.c_int)      #
+UI_SET_PHYS     =   constants.llevel.iow(UINPUT_IOCTL_BASE, 108, ctypes.c_char_p)   # OK
+UI_SET_SWBIT    =   constants.llevel.iow(UINPUT_IOCTL_BASE, 109, ctypes.c_int)      # OK
+UI_SET_PROPBIT  =   constants.llevel.iow(UINPUT_IOCTL_BASE, 110, ctypes.c_int)      # OK
