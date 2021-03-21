@@ -14,9 +14,8 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import virtualize.devices
-import functions.system
-import functions.utils
-import constants.glob
+import functions
+import constants
 import argparse
 import logging
 import sys
@@ -53,7 +52,7 @@ if __name__ == '__main__':
         devices = functions.system.get_all_devices_info()
         print(constants.glob.list_header)
 
-        devices = functions.system.natural_sort(devices, keyword='handler')
+        devices = functions.utils.natural_sort(devices, keyword='handler')
         print(f"{'ID':<5} {'Handler':<10} {'Device name'}")
 
         for pos, device in enumerate(devices):
