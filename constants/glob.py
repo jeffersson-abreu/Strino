@@ -13,7 +13,22 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
+import logging
+import sys
+
 # Linux living devices handler files
 DEVICES_PATH = '/dev/input'
 
 UINPUT_MAX_NAME_SIZE = 80
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('[%(asctime)s][%(levelname)s] - %(message)s', datefmt='%d-%m-%y %H:%M:%S')
+handler.setFormatter(formatter)
+
+logger.addHandler(handler)

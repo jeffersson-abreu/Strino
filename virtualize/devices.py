@@ -16,6 +16,7 @@
 import constants.uinput
 import constants.ecodes
 import structures.input
+import constants.glob
 import ctypes
 import fcntl
 import os
@@ -25,14 +26,16 @@ import os
 class VirtualDevice(object):
     def __init__(self, device_info):
 
-        if not isinstance(device_info, dict):
-            raise ValueError('VirtualDevice should receive a dict event capabilities.')
-
-        self.fd = os.open('/dev/uinput', os.O_RDWR | os.O_NONBLOCK)
-        self.libc = ctypes.CDLL('libc.so.6')
+        try:
+            self.fd = os.open('/dev/uinput', os.O_RDWR | os.O_NONBLOCK)
+        except Exception as err:
+            constants.glob.logger.error('Error when openning uinput file')
+            raise err
 
         self.events = device_info.pop('events')
         self.info = device_info
+
+        constants.glob.logger.info(f'Emulating {self.info.get("name")}')
 
         # Prepare the setup and clean the memory space
         self.usetup = structures.input.UinputSetup()
@@ -53,17 +56,24 @@ class VirtualDevice(object):
             # Set the event code bit
             fcntl.ioctl(self.fd, constants.uinput.UI_SET_EVBIT, event)
 
+            if event == constants.ecodes.event_types.get("EV_SYN"):
+                constants.glob.logger.info('Setting up event EV_SYN')
+
             if event == constants.ecodes.event_types.get("EV_KEY"):
+                constants.glob.logger.info('Setting up event EV_KEY')
                 for key in codes:
                     fcntl.ioctl(self.fd, constants.uinput.UI_SET_KEYBIT, key)
                 continue
 
             if event == constants.ecodes.event_types.get("EV_REL"):
+                constants.glob.logger.info('Setting up event EV_REL')
+
                 for key in codes:
                     fcntl.ioctl(self.fd, constants.uinput.UI_SET_RELBIT, key)
                 continue
 
             if event == constants.ecodes.event_types.get("EV_ABS"):
+                constants.glob.logger.info('Setting up event EV_ABS')
 
                 # Define all structures we gona use below
                 uinput_abs_setup = structures.input.UinputAbsSetup()
@@ -97,11 +107,13 @@ class VirtualDevice(object):
                 continue
 
         # This ioctl sets parameters for the input device to be created
+        constants.glob.logger.info('Writting setup to kernel')
         fcntl.ioctl(self.fd, constants.uinput.UI_DEV_SETUP, self.usetup)
 
         # On UI_DEV_CREATE the kernel will create the device node for this
         # device. We can start listening to the event, otherwise it will
         # not notice the events we are about to send.
+        constants.glob.logger.info('Creating the device node')
         fcntl.ioctl(self.fd, constants.uinput.UI_DEV_CREATE)
 
     def emit(self, ev_type, ev_code, ev_value):
@@ -130,6 +142,7 @@ class VirtualDevice(object):
 
     def destroy(self):
         """ Properly close the writer """
+        constants.glob.logger.info('Stopping device emulation')
         fcntl.ioctl(self.fd, constants.uinput.UI_DEV_DESTROY)
         os.close(self.fd)
         return None

@@ -22,6 +22,7 @@ import constants.glob
 
 import ctypes
 import fcntl
+import json
 import os
 
 
@@ -32,6 +33,8 @@ def get_device_info(file: open) -> dict:
     :param file: A file opened with built-in open function
     :return: Dict containing informations about device handled by file
     """
+
+    constants.glob.logger.info(f'Trying to get {file.name} informations')
 
     # Create the string buffer to make future ioctl calls
     max_name_size = ctypes.sizeof(constants.input.MAX_NAME_SIZE)
@@ -60,6 +63,8 @@ def get_device_info(file: open) -> dict:
     except IOError:
         pass
 
+    constants.glob.logger.info(f'Device name is "{name.value.decode()}"')
+
     return {
         'bustype': iid.bustype,
         'vendor': iid.vendor,
@@ -79,6 +84,8 @@ def get_all_devices_handlers() -> set:
     :return: A set of event handlers filename
     """
     file_handlers = set()
+
+    constants.glob.logger.info(f'Trying to get all hadlers in {constants.glob.DEVICES_PATH}')
 
     for _, _, files in os.walk(constants.glob.DEVICES_PATH):
         for file in files:
@@ -101,6 +108,7 @@ def get_all_devices_info() -> list:
     """
 
     all_devices = list()
+    constants.glob.logger.info(f'Trying to get informations about all devices found in {constants.glob.DEVICES_PATH}')
 
     for file in get_all_devices_handlers():
         file_path = os.path.join(constants.glob.DEVICES_PATH, file)
@@ -138,6 +146,7 @@ def get_device_capabilities(file: open) -> dict:
 
     # Fill 0 (clean) the memory space of ev_bits and call ioctl to get bits of
     # all event codes suported by device so we can build the device capabilities
+    constants.glob.logger.info(f'Trying to get all events supported by the device')
     ctypes.memset(ctypes.addressof(ev_bits), 0, ctypes.sizeof(ev_bits))
     fcntl.ioctl(file, constants.input.EVIOCGBIT(0, ev_bits), ev_bits)
 
@@ -190,5 +199,12 @@ def get_device_capabilities(file: open) -> dict:
                     else:
                         # Just append the event code to event type key
                         capabilities[keyname].append(ev_code)
+
+    constants.glob.logger.info(f'Success getting device supported events')
+
+    for key in capabilities.keys():
+        for name, code in constants.ecodes.event_types.items():
+            if key == code:
+                constants.glob.logger.info(f'Found event {name}')
 
     return capabilities
