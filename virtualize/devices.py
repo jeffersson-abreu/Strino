@@ -179,26 +179,22 @@ class VirtualDevice(object):
 
 
 class PhisicalDevice(object):
+    """ Represents a phisical device on the system """
     def __init__(self, handler=None):
 
         # The system handler file
         self.handler = handler
 
-    def read(self):
-        input_event = structures.input.InputEvent()
+        # Size of the buffer to read
+        self.buffer_size = ctypes.sizeof(structures.input.InputEvent)
 
-        with open(self.handler, 'rb') as device:
-            try:
-                with open('/home/jeffersson/data.txt', 'w') as datafile:
-
-                    while True:
-                        data = device.read(ctypes.sizeof(input_event))
-                        event = structures.input.InputEvent.from_buffer(bytearray(data))
-                        print(event.time.tv_sec, event.time.tv_usec, event.type, event.code, event.value)
-                        datafile.write(f'{event.type},{event.code},{event.value}\n')
-
-            except KeyboardInterrupt:
-                pass
+    def read(self, callback):
+        """ Read the device and pass data to the given callback """
+        if callable(callback):
+            with open(self.handler, 'rb') as device:
+                while True:
+                    data = device.read(self.buffer_size)
+                    callback(data)
 
 
 __all__ = [
