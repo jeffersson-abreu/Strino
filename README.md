@@ -73,7 +73,7 @@ To get a local copy up and running follow these simple example steps.
 ### Prerequisites
 
 You will only need git to clone this repository and use Strino. Git not comes with the most GNU/Linux systems, so we need to install it.
-* GIT
+* Git - (Debian based)
   ```sh
   $ sudo apt update
   $ sudo apt install git-all
@@ -89,14 +89,20 @@ You will only need git to clone this repository and use Strino. Git not comes wi
    ```sh
    cd Strino
    ```
-3. Start Strino server 
+3. Start Strino server. May you do not want a verbose output so just remove the --verbose flag the output will be 
+   redirected only to a file placed in your home folder
    ```sh
    python3 strino.py -t server -p PORT -a ADDR --devices MOUSE KEYBOARD --verbose
    ```
-   May you do not want a verbose output so just remove the --verbose flag the output will be silenced
 
-
-
+4. Once a client connect to the server we can change the peripherals focus using a shortcut. These keys are configurable
+   and lives in a file called [```settings.ini```](https://github.com/ctw6av/Strino/blob/master/settings.ini) so edit this file to change
+   the shortcuts. Once the clients are disposed inline by arriving use:
+   ```
+   Ctrl + -►  # Change focus to right
+   Ctrl + ◄-  # Change focus to left   
+   ```
+   
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -150,7 +156,7 @@ You will only need git to clone this repository and use Strino. Git not comes wi
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See [`LICENSE`](https://www.gnu.org/licenses/gpl-3.0.txt) for more information.
+Distributed under the MIT License. See [`LICENSE`](https://github.com/ctw6av/Strino/blob/master/LICENCE.md) for more information.
 
 <!-- CONTACT -->
 ## Contact
