@@ -47,7 +47,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About Strino
 
-![Strino](external/image2.png)
+![Strino](external/image1.png)
 
 Strino comes from the simply need of share a mouse and keyboard from computers running any GNU/Linux OS 
 (operating system) in the same LAN (Local Address Network). The thrust why I decided to write a program like Strino is
