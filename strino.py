@@ -16,6 +16,7 @@
 from server.server import start_server
 from client.client import connect_to
 import functions.utils
+import configparser
 import constants
 import argparse
 import logging
@@ -25,25 +26,24 @@ import os
 
 if __name__ == '__main__':
 
+    # Get the default server from settings
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    keys = config['STRINO_DEFAULTS']
+
+    verbose = keys.getboolean('verbose')
+    port = keys.getint('port')
+    addr = keys.get('addr')
+
     parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems with Strino.')
-    parser.add_argument('-a', '--addr', help='Enter the server address to connect', type=str, default='127.0.0.1')
-    parser.add_argument('-p', '--port', help='Enter the server port to connect', type=int, default=4000)
+    parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true", default=verbose)
+    parser.add_argument('-a', '--addr', help='Enter the server address to connect', type=str, default=addr)
+    parser.add_argument('-p', '--port', help='Enter the server port to connect', type=int, default=port)
+    parser.add_argument('-d', '--devices', help='List devices handlers to share', nargs='*', default=[])
     parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
-    parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true")
     parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str)
-    parser.add_argument('-d', '--devices', help='List devices to share', nargs='*')
 
     args = parser.parse_args()
-
-    # Project name. Yes I know it can be set in a string... anyway ;)
-    PROJECT_NAME = os.path.dirname(os.path.abspath(__file__))
-
-    # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-    BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), PROJECT_NAME)
-
-    # Add Strino to PYTHONPATH
-    if BASE_DIR not in sys.path:
-        sys.path.append(BASE_DIR)
 
     if args.verbose:
         # Add a handler and set the default output to stdout

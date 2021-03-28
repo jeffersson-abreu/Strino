@@ -61,7 +61,7 @@ class TCPServer(asyncio.Protocol):
                 device.release()
 
 
-def start_server(addr='127.0.0.1', port=4000, handlers=None):
+def start_server(addr, port, handlers=None):
 
     if handlers is not None:
         if isinstance(handlers, list):
