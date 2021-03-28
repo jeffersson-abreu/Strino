@@ -14,6 +14,6 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 __all__ = [
-    'utils',
-    'system'
+    'client',
+    'updates'
 ]

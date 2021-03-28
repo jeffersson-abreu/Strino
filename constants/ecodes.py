@@ -13,9 +13,6 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-# Max available events
-EV_MAX = int(0x1f)
-
 # Maximun synchronization events
 KEY_MAX = int(0x2ff)
 
@@ -25,18 +22,33 @@ ABS_MAX = int(0x3f)
 # Maximun SYN events
 SYN_MAX = int(0xf)
 
+EV_SYN      = 0x00
+EV_KEY      = 0x01
+EV_REL      = 0x02
+EV_ABS      = 0x03
+EV_MSC      = 0x04
+EV_SW       = 0x05
+EV_LED      = 0x11
+EV_SND      = 0x12
+EV_REP      = 0x14
+EV_FF       = 0x15
+EV_PWR      = 0x16
+EV_FF_STATU = 0x17
+EV_MAX      = 0x1f
+
+# Dict to help in loops
 event_types = {
-    'EV_SYN':		   0x00,
-    'EV_KEY':		   0x01,
-    'EV_REL':		   0x02,
-    'EV_ABS':		   0x03,
-    'EV_MSC':		   0x04,
-    'EV_SW':		   0x05,
-    'EV_LED':		   0x11,
-    'EV_SND':		   0x12,
-    'EV_REP':		   0x14,
-    'EV_FF':		   0x15,
-    'EV_PWR':		   0x16,
-    'EV_FF_STATUS':    0x17,
-    'EV_MAX':		   0x1f,
+    'EV_SYN':		   EV_SYN,
+    'EV_KEY':		   EV_KEY,
+    'EV_REL':		   EV_REL,
+    'EV_ABS':		   EV_ABS,
+    'EV_MSC':		   EV_MSC,
+    'EV_SW':		   EV_SW,
+    'EV_LED':		   EV_LED,
+    'EV_SND':		   EV_SND,
+    'EV_REP':		   EV_REP,
+    'EV_FF':		   EV_FF,
+    'EV_PWR':		   EV_PWR,
+    'EV_FF_STATUS':    EV_FF_STATU,
+    'EV_MAX':		   EV_MAX,
 }

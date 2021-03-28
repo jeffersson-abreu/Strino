@@ -14,6 +14,7 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 import logging
+import os
 
 # Linux living devices handler files
 DEVICES_PATH = '/dev/input'
@@ -23,11 +24,11 @@ UINPUT_MAX_NAME_SIZE = 80
 
 logger = logging.getLogger()
 
-format_string = '[%(asctime)s][%(levelname)s] - %(message)s'
+format_string = f'[%(levelname)s] [%(module)s] %(message)s'
 format_date = '%d-%m-%y %H:%M:%S'
 
 logging.basicConfig(
-    filename='/home/jeffersson/strino.log',
+    filename=f'{os.environ["HOME"]}/strino.log',
     format=format_string,
     datefmt=format_date,
     level=logging.INFO,

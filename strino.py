@@ -13,9 +13,9 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-import virtualize.devices
+from server.server import start_server
+from client.client import connect_to
 import functions.utils
-import functions.system
 import constants
 import argparse
 import logging
@@ -26,8 +26,12 @@ import os
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems with Strino.')
+    parser.add_argument('-a', '--addr', help='Enter the server address to connect', type=str, default='127.0.0.1')
+    parser.add_argument('-p', '--port', help='Enter the server port to connect', type=int, default=4000)
     parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
     parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true")
+    parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str)
+
     args = parser.parse_args()
 
     # print(args)
@@ -44,10 +48,12 @@ if __name__ == '__main__':
     if args.verbose:
         # Add a handler and set the default output to stdout
         handler = logging.StreamHandler(sys.stdout)
+        formatrer = logging.Formatter(constants.glob.format_string, datefmt=constants.glob.format_date)
+        handler.setFormatter(formatrer)
         handler.setLevel(logging.INFO)
 
         constants.glob.logger.addHandler(handler)
-        constants.glob.logger.error('Verbose output is set to true')
+        constants.glob.logger.info('Verbose output is set to true')
 
     if args.list:
         devices = functions.system.get_all_devices_info()
@@ -58,3 +64,17 @@ if __name__ == '__main__':
 
         for device in devices:
             print(f"{os.path.basename(device.get('handler')):<10} {device.get('name')}")
+
+    if args.type:
+
+        if args.type == 'server':
+
+            handlers = ['/dev/input/event0', '/dev/input/event5']
+
+            start_server(args.addr, args.port, handlers)
+
+        if args.type == 'client':
+            connect_to(addr=args.addr, port=args.port)
+            # pass
+
+

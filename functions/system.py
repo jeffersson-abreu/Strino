@@ -26,59 +26,60 @@ import os
 
 
 # noinspection PyTypeChecker
-def get_device_info(file: open) -> dict:
+def get_device_info(dev_handler: str) -> dict:
     """
     Get Device informations by a given file descriptor
-    :param file: A file opened with built-in open function
+    :param dev_handler: A file opened with built-in open function
     :return: Dict containing informations about device handled by file
     """
 
-    constants.glob.logger.info(f'Trying to get {file.name} informations')
+    with open(dev_handler, 'wb') as handler:
+        constants.glob.logger.info(f'Trying to get {handler.name} informations')
 
-    # Create the string buffer to make future ioctl calls
-    max_name_size = ctypes.sizeof(constants.input.MAX_NAME_SIZE)
-    name = ctypes.create_string_buffer(max_name_size)
-    phys = ctypes.create_string_buffer(max_name_size)
-    uniq = ctypes.create_string_buffer(max_name_size)
+        # Create the string buffer to make future ioctl calls
+        max_name_size = ctypes.sizeof(constants.input.MAX_NAME_SIZE)
+        name = ctypes.create_string_buffer(max_name_size)
+        phys = ctypes.create_string_buffer(max_name_size)
+        uniq = ctypes.create_string_buffer(max_name_size)
 
-    prop = ctypes.create_string_buffer(constants.input.INPUT_PROP_CNT // 8)
-    fcntl.ioctl(file, constants.input.EVIOCGPROP(prop), prop)
+        prop = ctypes.create_string_buffer(constants.input.INPUT_PROP_CNT // 8)
+        fcntl.ioctl(handler, constants.input.EVIOCGPROP(prop), prop)
 
-    # Instantiate a struct input_id and and
-    # clean (fill 0) memory of it's address
-    iid = structures.input.InputId()
-    ctypes.memset(ctypes.addressof(iid), 0, ctypes.sizeof(iid))
+        # Instantiate a struct input_id and and
+        # clean (fill 0) memory of it's address
+        iid = structures.input.InputId()
+        ctypes.memset(ctypes.addressof(iid), 0, ctypes.sizeof(iid))
 
-    # Get the file ID (type, vendor, product, version)
-    fcntl.ioctl(file, constants.input.EVIOCGID, iid)
+        # Get the file ID (type, vendor, product, version)
+        fcntl.ioctl(handler, constants.input.EVIOCGID, iid)
 
-    # Get the device name
-    fcntl.ioctl(file, constants.input.EVIOCGNAME, name)
+        # Get the device name
+        fcntl.ioctl(handler, constants.input.EVIOCGNAME, name)
 
-    # Some devices do not have a physical topology associated with them
-    fcntl.ioctl(file, constants.input.EVIOCGPHYS, phys)
+        # Some devices do not have a physical topology associated with them
+        fcntl.ioctl(handler, constants.input.EVIOCGPHYS, phys)
 
-    try:
-        # Some kernels have started reporting bluetooth controller MACs as phys.
-        # This lets us get the real physical address. As with phys, it may be blank.
-        fcntl.ioctl(file, constants.input.EVIOCGUNIQ, uniq)
-    except IOError:
-        pass
+        try:
+            # Some kernels have started reporting bluetooth controller MACs as phys.
+            # This lets us get the real physical address. As with phys, it may be blank.
+            fcntl.ioctl(handler, constants.input.EVIOCGUNIQ, uniq)
+        except IOError:
+            pass
 
-    constants.glob.logger.info(f'Device name is "{name.value.decode()}"')
+        constants.glob.logger.info(f'Device name is "{name.value.decode()}"')
 
-    return {
-        'bustype': iid.bustype,
-        'vendor': iid.vendor,
-        'product': iid.product,
-        'version': iid.version,
-        'name': name.value.decode(),
-        'phys': phys.value.decode(),
-        'unique': uniq.value.decode(),
-        'handler': file.name,
-        'prop': prop.raw,
-        'events': get_device_capabilities(file)
-    }
+        return {
+            'bustype': iid.bustype,
+            'vendor': iid.vendor,
+            'product': iid.product,
+            'version': iid.version,
+            'name': name.value.decode(),
+            'phys': phys.value.decode(),
+            'unique': uniq.value.decode(),
+            'handler': handler.name,
+            'prop': prop.raw,
+            'events': get_device_capabilities(dev_handler)
+        }
 
 
 def get_all_devices_handlers() -> list:
@@ -115,9 +116,8 @@ def get_all_devices_info() -> list:
 
     for file in get_all_devices_handlers():
         file_path = os.path.join(constants.glob.DEVICES_PATH, file)
-        with open(file_path, 'r') as handler:
-            device_info = get_device_info(handler)
-            all_devices.append(device_info)
+        device_info = get_device_info(file_path)
+        all_devices.append(device_info)
 
     return all_devices
 
@@ -133,82 +133,85 @@ def test_bit(bitmask: bytes, bit: int) -> int:
 
 
 # noinspection PyTypeChecker
-def get_device_capabilities(file: open) -> dict:
+def get_device_capabilities(dev_handler: str) -> dict:
     """
     Return all device events supported and keys related
-    :param file: A file opened with built-in open function
+    :param dev_handler: A file opened with built-in open function
     :return: Dict with device capabilities
     """
 
-    # Create char arrays to be filed in ioctl calls. This char's
-    # array a will handle events and key codes related to event
-    cd_bits = ctypes.create_string_buffer(constants.ecodes.KEY_MAX // 8 + 1)
-    ev_bits = ctypes.create_string_buffer(constants.ecodes.EV_MAX // 8 + 1)
+    with open(dev_handler, 'wb') as handler:
+        constants.glob.logger.info(f'Trying to get {handler.name} informations')
 
-    capabilities = dict()
+        # Create char arrays to be filed in ioctl calls. This char's
+        # array a will handle events and key codes related to event
+        cd_bits = ctypes.create_string_buffer(constants.ecodes.KEY_MAX // 8 + 1)
+        ev_bits = ctypes.create_string_buffer(constants.ecodes.EV_MAX // 8 + 1)
 
-    # Fill 0 (clean) the memory space of ev_bits and call ioctl to get bits of
-    # all event codes suported by device so we can build the device capabilities
-    constants.glob.logger.info(f'Trying to get all events supported by the device')
-    ctypes.memset(ctypes.addressof(ev_bits), 0, ctypes.sizeof(ev_bits))
-    fcntl.ioctl(file, constants.input.EVIOCGBIT(0, ev_bits), ev_bits)
+        capabilities = dict()
 
-    # Build a dictionary of the device's capabilities
-    for ev_type in range(0, constants.ecodes.EV_MAX):
-        if test_bit(ev_bits.raw, ev_type):
+        # Fill 0 (clean) the memory space of ev_bits and call ioctl to get bits of
+        # all event codes suported by device so we can build the device capabilities
+        constants.glob.logger.info(f'Trying to get all events supported by the device')
+        ctypes.memset(ctypes.addressof(ev_bits), 0, ctypes.sizeof(ev_bits))
+        fcntl.ioctl(handler, constants.input.EVIOCGBIT(0, ev_bits), ev_bits)
 
-            try:
-                # Fill 0 (clean) the momory space of cd_bits and call ioctl to get all
-                # related event codes so we can build a list of codes handled by event
-                ctypes.memset(ctypes.addressof(cd_bits), 0, ctypes.sizeof(cd_bits))
-                fcntl.ioctl(file, constants.input.EVIOCGBIT(ev_type, cd_bits), cd_bits)
-            except OSError:
-                # Sometime an argument error occurs we
-                # just break the loop and keep going
-                break
+        # Build a dictionary of the device's capabilities
+        for ev_type in range(0, constants.ecodes.EV_MAX):
+            if test_bit(ev_bits.raw, ev_type):
 
-            keyname = ev_type
+                try:
+                    # Fill 0 (clean) the momory space of cd_bits and call ioctl to get all
+                    # related event codes so we can build a list of codes handled by event
+                    ctypes.memset(ctypes.addressof(cd_bits), 0, ctypes.sizeof(cd_bits))
+                    fcntl.ioctl(handler, constants.input.EVIOCGBIT(ev_type, cd_bits), cd_bits)
+                except OSError:
+                    # Sometime an argument error occurs we
+                    # just break the loop and keep going
+                    break
 
-            # if no error occurs so add the event key
-            capabilities[keyname] = []
+                keyname = ev_type
 
-            for ev_code in range(0, constants.ecodes.KEY_MAX):
-                if test_bit(cd_bits.raw, ev_code):
+                # if no error occurs so add the event key
+                capabilities[keyname] = []
 
-                    if ev_type == constants.ecodes.event_types['EV_ABS']:
-                        abs_info = structures.input.ABSInfo()
+                for ev_code in range(0, constants.ecodes.KEY_MAX):
+                    if test_bit(cd_bits.raw, ev_code):
 
-                        # At this point we just check if event type is EV_ABS so clean the memory
-                        # space of the instance of ABSInfo defined above and call the kernel to
-                        # give us info about ABS device capabilities
-                        ctypes.memset(ctypes.addressof(abs_info), 0, ctypes.sizeof(abs_info))
-                        fcntl.ioctl(file, constants.input.EVIOCGABS(ev_code), abs_info)
+                        if ev_type == constants.ecodes.event_types['EV_ABS']:
+                            abs_info = structures.input.ABSInfo()
 
-                        _abs = {
-                            'value': abs_info.value,
-                            'minimum': abs_info.minimum,
-                            'maximum': abs_info.maximum,
-                            'fuzz': abs_info.fuzz,
-                            'flat': abs_info.flat,
-                            'resolution': abs_info.resolution
-                        }
+                            # At this point we just check if event type is EV_ABS so clean the memory
+                            # space of the instance of ABSInfo defined above and call the kernel to
+                            # give us info about ABS device capabilities
+                            ctypes.memset(ctypes.addressof(abs_info), 0, ctypes.sizeof(abs_info))
+                            fcntl.ioctl(handler, constants.input.EVIOCGABS(ev_code), abs_info)
 
-                        # Get the event list and save the ABS
-                        # dict in a tuple numered by event...
-                        # Eg: (00, _abs)
-                        event = capabilities[keyname]
-                        event.append((ev_code, _abs))
+                            _abs = {
+                                'value': abs_info.value,
+                                'minimum': abs_info.minimum,
+                                'maximum': abs_info.maximum,
+                                'fuzz': abs_info.fuzz,
+                                'flat': abs_info.flat,
+                                'resolution': abs_info.resolution
+                            }
 
-                    else:
-                        # Just append the event code to event type key
-                        capabilities[keyname].append(ev_code)
+                            # Get the event list and save the ABS
+                            # dict in a tuple numered by event...
+                            # Eg: (00, _abs)
+                            event = capabilities[keyname]
+                            event.append((ev_code, _abs))
 
-    constants.glob.logger.info(f'Success getting device supported events')
+                        else:
+                            # Just append the event code to event type key
+                            capabilities[keyname].append(ev_code)
 
-    for key in capabilities.keys():
-        for name, code in constants.ecodes.event_types.items():
-            if key == code:
-                constants.glob.logger.info(f'Found event {name}')
+        constants.glob.logger.info(f'Success getting device supported events')
 
-    constants.glob.logger.info(f'End device event reports\n')
-    return capabilities
+        for key in capabilities.keys():
+            for name, code in constants.ecodes.event_types.items():
+                if key == code:
+                    constants.glob.logger.info(f'Found event {name}')
+
+        constants.glob.logger.info(f'End device event reports\n')
+        return capabilities

@@ -13,9 +13,11 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-
+import server.updates
+import random
+import string
 import re
-
+import structures.input
 
 def to_int(obj: str):
     """
@@ -70,8 +72,14 @@ def natural_sort(_list: list, keyword=None) -> list:
     return sorted(_list, key=lambda key: order_by_alphanum(key, keyword=keyword))
 
 
+def generate_random_id(size=8, chars=string.ascii_uppercase + string.digits):
+    """ Generate a random id to make clean clients server space """
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
 __all__ = [
     'natural_sort',
     'order_by_alphanum',
+    'generate_random_id',
     'to_int'
 ]

@@ -40,6 +40,15 @@ EVIOCGUNIQ = constants.llevel.ior(DEVICE_ID_BASE, 0x08, MAX_NAME_SIZE)
 INPUT_PROP_MAX = 0x1f
 INPUT_PROP_CNT = (INPUT_PROP_MAX + 1)
 
+# Grab device access
+EVIOCGRAB = constants.llevel.iow('E', 0x90, ctypes.c_int)
+
+# Revoke device access
+EVIOCREVOKE = constants.llevel.iow('E', 0x91, ctypes.c_int)
+
+# Virtual bus
+BUS_VIRTUAL = 0x06
+
 
 # Get device properties
 def EVIOCGPROP(length):
