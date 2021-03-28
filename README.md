@@ -91,7 +91,7 @@ You will only need git to clone this repository and use Strino. Git not comes wi
    ```
 3. Start Strino server 
    ```sh
-   python3 strino.py -t server -p PORT -a ADDR --verbose
+   python3 strino.py -t server -p PORT -a ADDR --devices MOUSE KEYBOARD --verbose
    ```
    May you do not want a verbose output so just remove the --verbose flag the output will be silenced
 
@@ -102,10 +102,11 @@ You will only need git to clone this repository and use Strino. Git not comes wi
 ## Usage
 
 1. Run with -h or --help to more detailed usages
-   ```sh
+   ```
     $ sudo python3 strino.py --help
     usage: strino.py [-h] [-a ADDR] [-p PORT] [-l] [-v] [-t TYPE]
-    
+                 [-d [DEVICES [DEVICES ...]]]
+
     Share your IO in unix like operating systems with Strino.
     
     optional arguments:
@@ -115,11 +116,13 @@ You will only need git to clone this repository and use Strino. Git not comes wi
       -l, --list            List of available devices to share
       -v, --verbose         Increase the output verbosity
       -t TYPE, --type TYPE  Enter the type (server or client)
-   
+      -d [DEVICES [DEVICES ...]], --devices [DEVICES [DEVICES ...]]
+                            List devices to share
+
    ```
 
 2. Get a list of all devices available
-   ```sh
+   ```
     $ sudo python3 strino.py --list 
    
     Handler    Device name

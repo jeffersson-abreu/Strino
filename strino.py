@@ -31,10 +31,10 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
     parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true")
     parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str)
+    parser.add_argument('-d', '--devices', help='List devices to share', nargs='*')
 
     args = parser.parse_args()
 
-    # print(args)
     # Project name. Yes I know it can be set in a string... anyway ;)
     PROJECT_NAME = os.path.dirname(os.path.abspath(__file__))
 
@@ -69,9 +69,13 @@ if __name__ == '__main__':
 
         if args.type == 'server':
 
-            handlers = ['/dev/input/event0', '/dev/input/event5']
+            devices = []
 
-            start_server(args.addr, args.port, handlers)
+            for device in args.devices:
+                path = os.path.join(constants.glob.DEVICES_PATH, device)
+                devices.append(path)
+
+            start_server(args.addr, args.port, devices)
 
         if args.type == 'client':
             connect_to(addr=args.addr, port=args.port)
