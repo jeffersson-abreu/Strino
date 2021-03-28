@@ -53,7 +53,8 @@ class TCPServer(asyncio.Protocol):
         # set the focus back to us and release all devices
         if len(server.updates.clients) == 1:
             constants.glob.logger.info("Setting the focus back to the server")
-            server.updates.focus = None
+            keys = list(server.updates.clients.keys())
+            server.updates.focus = keys[0]  # Focus to the server
 
             for name, device in server.updates.devices.items():
                 constants.glob.logger.info(f"Releasing {name}")
