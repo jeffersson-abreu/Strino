@@ -19,7 +19,9 @@ import ctypes
 
 
 # Define the maximun name size of a device
-MAX_NAME_SIZE = ctypes.create_string_buffer(256)
+MAX_NAME_BUFFER = ctypes.create_string_buffer(256)
+MAX_NAME_SIZE = ctypes.sizeof(MAX_NAME_BUFFER)
+
 
 # Device id base generator
 DEVICE_ID_BASE = 'E'
@@ -28,13 +30,13 @@ DEVICE_ID_BASE = 'E'
 EVIOCGID = constants.llevel.ior(DEVICE_ID_BASE, 0x02, structures.input.InputId)
 
 # Get Devices name
-EVIOCGNAME = constants.llevel.ior(DEVICE_ID_BASE, 0x06, MAX_NAME_SIZE)
+EVIOCGNAME = constants.llevel.ior(DEVICE_ID_BASE, 0x06, MAX_NAME_BUFFER)
 
 # Get devices location
-EVIOCGPHYS = constants.llevel.ior(DEVICE_ID_BASE, 0x07, MAX_NAME_SIZE)
+EVIOCGPHYS = constants.llevel.ior(DEVICE_ID_BASE, 0x07, MAX_NAME_BUFFER)
 
 # Get devices unique identifier
-EVIOCGUNIQ = constants.llevel.ior(DEVICE_ID_BASE, 0x08, MAX_NAME_SIZE)
+EVIOCGUNIQ = constants.llevel.ior(DEVICE_ID_BASE, 0x08, MAX_NAME_BUFFER)
 
 # Max number of device properties
 INPUT_PROP_MAX = 0x1f
