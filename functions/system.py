@@ -37,10 +37,9 @@ def get_device_info(dev_handler: str) -> dict:
         constants.glob.logger.info(f'Trying to get {handler.name} informations')
 
         # Create the string buffer to make future ioctl calls
-        max_name_size = ctypes.sizeof(constants.input.MAX_NAME_SIZE)
-        name = ctypes.create_string_buffer(max_name_size)
-        phys = ctypes.create_string_buffer(max_name_size)
-        uniq = ctypes.create_string_buffer(max_name_size)
+        name = ctypes.create_string_buffer(constants.input.MAX_NAME_SIZE)
+        phys = ctypes.create_string_buffer(constants.input.MAX_NAME_SIZE)
+        uniq = ctypes.create_string_buffer(constants.input.MAX_NAME_SIZE)
 
         prop = ctypes.create_string_buffer(constants.input.INPUT_PROP_CNT // 8)
         fcntl.ioctl(handler, constants.input.EVIOCGPROP(prop), prop)
@@ -80,6 +79,32 @@ def get_device_info(dev_handler: str) -> dict:
             'prop': prop.raw,
             'events': get_device_capabilities(dev_handler)
         }
+
+
+# noinspection PyTypeChecker
+def get_handlers_by_devices_name(names: list):
+    """
+    Get device handler by a giving device name
+    :param: names: A list containing device names
+    :return: A list containind valid device handlers
+    """
+
+    # Create the string buffer to make future ioctl calls
+    name = ctypes.create_string_buffer(constants.input.MAX_NAME_SIZE)
+    handlers = list()
+
+    for handler in get_all_devices_handlers():
+        # Get the device name
+        with open(handler, 'rb') as hd:
+            fcntl.ioctl(hd, constants.input.EVIOCGNAME, name)
+            decoded_name = name.value.decode()
+            if decoded_name in names:
+                handlers.append(os.path.basename(handler))
+                continue
+            else:
+                constants.glob.logger.error(f"Device {decoded_name} not exists")
+
+    return handlers
 
 
 def get_all_devices_handlers(basename=False) -> list:
