@@ -26,6 +26,12 @@ import os
 
 if __name__ == '__main__':
 
+    # Check if user has root access.
+    # All operations need root
+    if os.geteuid():
+        print('We need root access!')
+        sys.exit(1)
+
     # Get the default server from settings
     config = configparser.ConfigParser()
     config.read('settings.ini')
