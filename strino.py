@@ -40,6 +40,7 @@ if __name__ == '__main__':
     verbose = keys.getboolean('verbose')
     port = keys.getint('port')
     addr = keys.get('addr')
+    tp = keys.get('type')
 
     # Get default devices in settings
     dev_section = config['STRINO_DEVICES']
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--addr', help='Enter the server address to connect', type=str, default=addr)
     parser.add_argument('-p', '--port', help='Enter the server port to connect', type=int, default=port)
     parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
-    parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str)
+    parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str, default=tp)
 
     args = parser.parse_args()
 
