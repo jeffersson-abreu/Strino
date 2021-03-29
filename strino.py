@@ -41,11 +41,18 @@ if __name__ == '__main__':
     port = keys.getint('port')
     addr = keys.get('addr')
 
+    # Get default devices in settings
+    dev_section = config['STRINO_DEVICES']
+
+    # Check if devices has handlers and pass it as default
+    devices = [dev_section.get(device) for device in dev_section]
+    handlers = functions.system.get_handlers_by_devices_name(devices)
+
     parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems with Strino.')
+    parser.add_argument('-d', '--devices', help='List devices handlers to share', nargs='*', type=str, default=handlers)
     parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true", default=verbose)
     parser.add_argument('-a', '--addr', help='Enter the server address to connect', type=str, default=addr)
     parser.add_argument('-p', '--port', help='Enter the server port to connect', type=int, default=port)
-    parser.add_argument('-d', '--devices', help='List devices handlers to share', nargs='*', type=str, default=[])
     parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
     parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str)
 
@@ -85,9 +92,12 @@ if __name__ == '__main__':
                 if device not in handlers:
                     constants.glob.logger.info(f"{device} is not a valid device handler")
                     continue
-                filtered_devices.append(device)
 
-            start_server(args.addr, args.port, args.devices)
+                filtered_devices.append(
+                    os.path.join(constants.glob.DEVICES_PATH, device)
+                )
+
+            start_server(args.addr, args.port, filtered_devices)
 
         if args.type == 'client':
             connect_to(addr=args.addr, port=args.port)
