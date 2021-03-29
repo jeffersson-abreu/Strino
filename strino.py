@@ -15,8 +15,8 @@
 
 from server.server import start_server
 from client.client import connect_to
-import functions.utils
 import configparser
+import functions
 import constants
 import argparse
 import logging
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', help='Increase the output verbosity', action="store_true", default=verbose)
     parser.add_argument('-a', '--addr', help='Enter the server address to connect', type=str, default=addr)
     parser.add_argument('-p', '--port', help='Enter the server port to connect', type=int, default=port)
-    parser.add_argument('-d', '--devices', help='List devices handlers to share', nargs='*', default=[])
+    parser.add_argument('-d', '--devices', help='List devices handlers to share', nargs='*', type=str, default=[])
     parser.add_argument('-l', '--list', help='List of available devices to share', action="store_true")
     parser.add_argument('-t', '--type', help='Enter the type (server or client)', type=str)
 
@@ -69,16 +69,19 @@ if __name__ == '__main__':
 
         if args.type == 'server':
 
-            devices = []
+            # Get a list of all available events handlers in system
+            handlers = functions.system.get_all_devices_handlers(basename=True)
 
+            # Filter devices to accept only valid devices.
+            # This devices should exists in handlers
+            filtered_devices = []
             for device in args.devices:
-                path = os.path.join(constants.glob.DEVICES_PATH, device)
-                devices.append(path)
+                if device not in handlers:
+                    constants.glob.logger.info(f"{device} is not a valid device handler")
+                    continue
+                filtered_devices.append(device)
 
-            start_server(args.addr, args.port, devices)
+            start_server(args.addr, args.port, args.devices)
 
         if args.type == 'client':
             connect_to(addr=args.addr, port=args.port)
-            # pass
-
-
