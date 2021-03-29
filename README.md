@@ -89,13 +89,46 @@ You will only need git to clone this repository and use Strino. Git not comes wi
    ```sh
    cd Strino
    ```
-3. Start Strino server. May you do not want a verbose output so just remove the --verbose flag the output will be 
-   redirected only to a file placed in your home folder
+
+3. Open the [```settings.ini```](https://github.com/ctw6av/Strino/blob/master/settings.ini) configuration file and see 
+   some default values. You can edit this file however you want, so we won't have the need for CLI parameters   
    ```sh
-   python3 strino.py -t server -p PORT -a ADDR --devices MOUSE KEYBOARD --verbose
+   $ cat settings.ini
+   ```
+   
+4. Get a list of all devices and theirs respective handlers available
+   ```
+    $ sudo python3 strino.py --list 
+   
+    Handler    Device name
+    event0     AT Translated Set 2 keyboard
+    event1     Lid Switch
+    event2     Power Button
+    event3     Power Button
+    event4     Video Bus
+    event5     Dell Dell USB Optical Mouse
+    event6     ETPS/2 Elantech Touchpad
+    event7     PC Speaker
+    event8     Ideapad extra buttons
+    event9     HDA Intel HDMI HDMI/DP,pcm=3
+    event10    HDA Intel HDMI HDMI/DP,pcm=7
+    event11    HDA Intel HDMI HDMI/DP,pcm=8
+    event12    HDA Intel HDMI HDMI/DP,pcm=9
+    event13    HDA Intel HDMI HDMI/DP,pcm=10
+    event14    HDA Intel PCH Mic
+    event15    HDA Intel PCH Headphone
+    event16    Lenovo EasyCamera: Lenovo EasyC
+   
+   ```
+   
+5. Start Strino server by passing as devices the handlers that we get by running with ```--list``` option. May you do not 
+   want a verbose output so just remove the --verbose flag the output will be 
+   redirected only to a file placed in your home folder.
+   ```sh
+   python3 strino.py -t server -p PORT -a ADDR --devices event0 event5 --verbose
    ```
 
-4. Once a client connect to the server we can change the peripherals focus using a shortcut. These keys are configurable
+6. Once a client connect to the server we can change the peripherals focus using a shortcut. These keys are configurable
    and lives in a file called [```settings.ini```](https://github.com/ctw6av/Strino/blob/master/settings.ini) so edit this file to change
    the shortcuts. Once the clients are disposed inline by arriving use:
    ```
@@ -123,7 +156,7 @@ You will only need git to clone this repository and use Strino. Git not comes wi
       -v, --verbose         Increase the output verbosity
       -t TYPE, --type TYPE  Enter the type (server or client)
       -d [DEVICES [DEVICES ...]], --devices [DEVICES [DEVICES ...]]
-                            List devices to share
+                            Devices handlers list to share
 
    ```
 
