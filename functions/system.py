@@ -82,25 +82,25 @@ def get_device_info(dev_handler: str) -> dict:
         }
 
 
-def get_all_devices_handlers() -> list:
+def get_all_devices_handlers(basename=False) -> list:
     """
     Get all devices file handlers living in linux /dev/input folder
+    :param: basename: Boolean value to control if file returns as a full path
     :return: A set of event handlers filename
     """
     file_handlers = set()
-
-    constants.glob.logger.info(f'Trying to get all hadlers in {constants.glob.DEVICES_PATH}')
 
     for _, _, files in os.walk(constants.glob.DEVICES_PATH):
         for file in files:
             # Filter only files that name starts with "event"
             if file.startswith('event'):
-                file_handlers.add(
-                    os.path.join(
-                        constants.glob.DEVICES_PATH,
-                        file
-                    )
+                path = os.path.join(
+                    constants.glob.DEVICES_PATH,
+                    file
                 )
+
+                # Depending on basename append a filname or a full path
+                file_handlers.add(file if basename else path)
 
     return list(file_handlers)
 
