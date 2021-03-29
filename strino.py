@@ -32,9 +32,11 @@ if __name__ == '__main__':
         print('We need root access!')
         sys.exit(1)
 
+    settings = os.path.join(constants.glob.BASE_DIR, 'settings.ini')
+
     # Get the default server from settings
     config = configparser.ConfigParser()
-    config.read('settings.ini')
+    config.read(settings)
     keys = config['STRINO_DEFAULTS']
 
     verbose = keys.getboolean('verbose')

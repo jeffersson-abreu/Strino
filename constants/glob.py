@@ -21,6 +21,8 @@ DEVICES_PATH = '/dev/input'
 
 UINPUT_MAX_NAME_SIZE = 80
 
+# Add a base to build absolute path's
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 logger = logging.getLogger()
 

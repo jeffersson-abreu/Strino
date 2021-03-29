@@ -197,8 +197,9 @@ class PhisicalDevice(object):
         # shortcut keys used to switch between screens
         self.bind_keys = self.is_keyboard()
 
+        settings = os.path.join(constants.glob.BASE_DIR, 'settings.ini')
         config = configparser.ConfigParser()
-        config.read('settings.ini')
+        config.read(settings)
 
         keys = config['SCREEN_SWITCH_KEYS']
 

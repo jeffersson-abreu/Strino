@@ -13,11 +13,10 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-import server.updates
 import random
 import string
 import re
-import structures.input
+
 
 def to_int(obj: str):
     """
