@@ -20,7 +20,7 @@ import re
 
 def to_int(obj: str):
     """
-    Convet a string to integer if possible
+    Convert a string to integer if possible
     and if not possible make it lowercase
     :param obj: Any string digit
     :return: Undefined

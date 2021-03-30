@@ -28,13 +28,13 @@ import os
 # noinspection PyTypeChecker
 def get_device_info(dev_handler: str) -> dict:
     """
-    Get Device informations by a given file descriptor
+    Get Device information by a given file descriptor
     :param dev_handler: A file opened with built-in open function
-    :return: Dict containing informations about device handled by file
+    :return: Dict containing information about device handled by file
     """
 
     with open(dev_handler, 'wb') as handler:
-        constants.glob.logger.info(f'Trying to get {handler.name} informations')
+        constants.glob.logger.info(f'Trying to get {handler.name} information')
 
         # Create the string buffer to make future ioctl calls
         name = ctypes.create_string_buffer(constants.input.MAX_NAME_SIZE)
@@ -86,7 +86,7 @@ def get_handlers_by_devices_name(names: list):
     """
     Get device handler by a giving device name
     :param: names: A list containing device names
-    :return: A list containind valid device handlers
+    :return: A list containing valid device handlers
     """
 
     # Create the string buffer to make future ioctl calls
@@ -124,7 +124,7 @@ def get_all_devices_handlers(basename=False) -> list:
                     file
                 )
 
-                # Depending on basename append a filname or a full path
+                # Depending on basename append a file name or a full path
                 file_handlers.add(file if basename else path)
 
     return list(file_handlers)
@@ -133,11 +133,11 @@ def get_all_devices_handlers(basename=False) -> list:
 def get_all_devices_info() -> list:
     """
     Get a list of all devices handled by files living in /dev/input
-    :return: A list of dicionary devices info
+    :return: A list of dictionary devices info
     """
 
     all_devices = list()
-    constants.glob.logger.info(f'Trying to get informations about all devices found in {constants.glob.DEVICES_PATH}')
+    constants.glob.logger.info(f'Trying to get information about all devices found in {constants.glob.DEVICES_PATH}')
 
     for file in get_all_devices_handlers():
         file_path = os.path.join(constants.glob.DEVICES_PATH, file)
@@ -166,7 +166,7 @@ def get_device_capabilities(dev_handler: str) -> dict:
     """
 
     with open(dev_handler, 'wb') as handler:
-        constants.glob.logger.info(f'Trying to get {handler.name} informations')
+        constants.glob.logger.info(f'Trying to get {handler.name} information')
 
         # Create char arrays to be filed in ioctl calls. This char's
         # array a will handle events and key codes related to event
@@ -176,7 +176,7 @@ def get_device_capabilities(dev_handler: str) -> dict:
         capabilities = dict()
 
         # Fill 0 (clean) the memory space of ev_bits and call ioctl to get bits of
-        # all event codes suported by device so we can build the device capabilities
+        # all event codes supported by device so we can build the device capabilities
         constants.glob.logger.info(f'Trying to get all events supported by the device')
         ctypes.memset(ctypes.addressof(ev_bits), 0, ctypes.sizeof(ev_bits))
         fcntl.ioctl(handler, constants.input.EVIOCGBIT(0, ev_bits), ev_bits)
@@ -186,7 +186,7 @@ def get_device_capabilities(dev_handler: str) -> dict:
             if test_bit(ev_bits.raw, ev_type):
 
                 try:
-                    # Fill 0 (clean) the momory space of cd_bits and call ioctl to get all
+                    # Fill 0 (clean) the memory space of cd_bits and call ioctl to get all
                     # related event codes so we can build a list of codes handled by event
                     ctypes.memset(ctypes.addressof(cd_bits), 0, ctypes.sizeof(cd_bits))
                     fcntl.ioctl(handler, constants.input.EVIOCGBIT(ev_type, cd_bits), cd_bits)
@@ -222,7 +222,7 @@ def get_device_capabilities(dev_handler: str) -> dict:
                             }
 
                             # Get the event list and save the ABS
-                            # dict in a tuple numered by event...
+                            # dict in a tuple numbered by event...
                             # Eg: (00, _abs)
                             event = capabilities[keyname]
                             event.append((ev_code, _abs))

@@ -37,7 +37,7 @@ class TCPServer(asyncio.Protocol):
         self.transport = transport
 
     def data_received(self, data):
-        # All comunication is made by events. The
+        # All communication is made by events. The
         # events are generated and handled by Events
         # class defined at module "events"
         self.events.handle(data, self)
@@ -67,7 +67,7 @@ def start_server(addr, port, handlers=None):
         if isinstance(handlers, list):
             for handler in handlers:
                 # Start the threads that read device events
-                device = virtualize.devices.PhisicalDevice(handler)
+                device = virtualize.devices.PhysicalDevice(handler)
                 server.updates.devices[device.info.get('name')] = device
                 p = Thread(target=device.read, daemon=True)
                 p.start()
@@ -78,7 +78,7 @@ def start_server(addr, port, handlers=None):
 
     constants.glob.logger.info(f"Starting server at {addr}:{port}")
 
-    # Genetating default main server identification
+    # Generating default main server identification
     loop = asyncio.get_event_loop()
     identification = functions.utils.generate_random_id()
     server.updates.clients[identification] = {'transport': None}

@@ -13,7 +13,7 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-# This itens that can chage their values
+# This items that can change their values
 # any time during the program execution
 
 import constants.glob
@@ -29,7 +29,7 @@ events = queue.SimpleQueue()
 def exec_from_queue():
     """
     Get events from queue and execute
-    then by emmiting to emulated device
+    then by emitting to emulated device
     """
     constants.glob.logger.error("Starting dequeue thread")
 

@@ -32,7 +32,7 @@ if __name__ == '__main__':
         print('We need root access!')
         sys.exit(1)
 
-    settings = os.path.join(constants.glob.BASE_DIR, 'settings.ini')
+    settings = os.path.join(constants.glob.BASE_DIR, 'etc/settings.ini')
 
     # Get the default server from settings
     config = configparser.ConfigParser()
@@ -64,8 +64,8 @@ if __name__ == '__main__':
     if args.verbose:
         # Add a handler and set the default output to stdout
         handler = logging.StreamHandler(sys.stdout)
-        formatrer = logging.Formatter(constants.glob.format_string, datefmt=constants.glob.format_date)
-        handler.setFormatter(formatrer)
+        formatter = logging.Formatter(constants.glob.format_string, datefmt=constants.glob.format_date)
+        handler.setFormatter(formatter)
         handler.setLevel(logging.INFO)
 
         constants.glob.logger.addHandler(handler)

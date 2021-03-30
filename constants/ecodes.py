@@ -13,13 +13,13 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-# Maximun synchronization events
+# Maximum synchronization events
 KEY_MAX = int(0x2ff)
 
-# Maximun abs events
+# Maximum abs events
 ABS_MAX = int(0x3f)
 
-# Maximun SYN events
+# Maximum SYN events
 SYN_MAX = int(0xf)
 
 EV_SYN      = 0x00
@@ -33,7 +33,7 @@ EV_SND      = 0x12
 EV_REP      = 0x14
 EV_FF       = 0x15
 EV_PWR      = 0x16
-EV_FF_STATU = 0x17
+EV_FF_STATUS = 0x17
 EV_MAX      = 0x1f
 
 # Dict to help in loops
@@ -49,6 +49,6 @@ event_types = {
     'EV_REP':		   EV_REP,
     'EV_FF':		   EV_FF,
     'EV_PWR':		   EV_PWR,
-    'EV_FF_STATUS':    EV_FF_STATU,
+    'EV_FF_STATUS':    EV_FF_STATUS,
     'EV_MAX':		   EV_MAX,
 }

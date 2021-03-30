@@ -33,13 +33,13 @@ class TCPClient(asyncio.Protocol):
 
     def connection_made(self, transport):
         self.transport = transport
-        # Afeter conecting to the server starts the sync process by
+        # After connecting to the server starts the sync process by
         # creating an announcement event and then send it to server
         event = self.events.generate('ANNOUNCEMENT', self)
         self.transport.write(event)
 
     def data_received(self, data):
-        # All comunication is made by events. The
+        # All communication is made by events. The
         # events are generated and handled by Events
         # class defined at module "events"
         self.events.handle(data, self)
@@ -88,7 +88,7 @@ def connect_to(addr='127.0.0.1', port=4000):
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        constants.glob.logger.info("Stopping the comunication")
+        constants.glob.logger.info("Stopping the communication")
         for name in client.updates.devices.keys():
             device = client.updates.devices.get(name)
             device.destroy()

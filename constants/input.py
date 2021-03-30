@@ -18,7 +18,7 @@ import structures.input
 import ctypes
 
 
-# Define the maximun name size of a device
+# Define the Maximum name size of a device
 MAX_NAME_BUFFER = ctypes.create_string_buffer(256)
 MAX_NAME_SIZE = ctypes.sizeof(MAX_NAME_BUFFER)
 
@@ -57,14 +57,14 @@ def EVIOCGPROP(length):
     return constants.llevel.ior(DEVICE_ID_BASE, 0x09, length)
 
 
-def EVIOCGBIT(ev_type, lenght) -> int:
+def EVIOCGBIT(ev_type, length) -> int:
     """
     Get events bits
     :param ev_type: Event code (0 retrieves all event handled)
-    :param lenght: The length of string buffer (ctypes)
+    :param length: The length of string buffer (ctypes)
     :return: Ioctl read operation number
     """
-    return constants.llevel.ior(DEVICE_ID_BASE, 0x20 + ev_type, lenght)
+    return constants.llevel.ior(DEVICE_ID_BASE, 0x20 + ev_type, length)
 
 
 def EVIOCGABS(code: int) -> int:

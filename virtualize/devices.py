@@ -34,7 +34,7 @@ class VirtualDevice(object):
         try:
             self.fd = os.open('/dev/uinput', os.O_RDWR | os.O_NONBLOCK)
         except Exception as err:
-            constants.glob.logger.error('Error when openning uinput file')
+            constants.glob.logger.error('Error when opening uinput file')
             raise err
 
         self.events = device_info.pop('events')
@@ -54,7 +54,7 @@ class VirtualDevice(object):
         self.usetup.id.product = self.info['product']
         self.usetup.id.vendor = self.info['vendor']
 
-        # Set our bus diferent from the original info because now
+        # Set our bus different from the original info because now
         # we are emulating the device so set bus as virtual
         self.usetup.id.bustype = constants.input.BUS_VIRTUAL
 
@@ -107,7 +107,7 @@ class VirtualDevice(object):
             if event == constants.ecodes.event_types.get("EV_ABS"):
                 constants.glob.logger.info('Setting up event EV_ABS')
 
-                # Define all structures we gona use below
+                # Define all structures we gonna use below
                 uinput_abs_setup = structures.input.UinputAbsSetup()
                 abs_info = structures.input.ABSInfo()
 
@@ -144,7 +144,7 @@ class VirtualDevice(object):
                 fcntl.ioctl(self.fd, constants.uinput.UI_SET_PROPBIT, bit)
 
         # This ioctl sets parameters for the input device to be created
-        constants.glob.logger.info('Writting setup to kernel')
+        constants.glob.logger.info('Writing setup to kernel')
         fcntl.ioctl(self.fd, constants.uinput.UI_DEV_SETUP, self.usetup)
 
         # On UI_DEV_CREATE the kernel will create the device node for this
@@ -179,13 +179,13 @@ class VirtualDevice(object):
         return None
 
 
-class PhisicalDevice(object):
-    """ Represents a phisical device on the system """
+class PhysicalDevice(object):
+    """ Represents a physical device on the system """
     def __init__(self, handler=None):
 
         self.handler_path = handler
 
-        # Get device capabilities and device informations
+        # Get device capabilities and device information
         self.capabilities = functions.system.get_device_capabilities(handler)
         self.info = functions.system.get_device_info(handler)
 
@@ -228,7 +228,6 @@ class PhisicalDevice(object):
         Enhanced European Keyboard - 102 keys
         Windows Keyboard - 104 keys
         Windows-based Laptop Keyboard - 86 keys
-
         """
         if constants.ecodes.EV_KEY in self.capabilities.keys():
             keys = self.capabilities.get(constants.ecodes.EV_KEY)
@@ -259,18 +258,18 @@ class PhisicalDevice(object):
         try:
             self.handler = os.open(self.handler_path, os.O_RDWR)
         except FileNotFoundError:
-            constants.glob.logger.error("Error openning device handler file")
+            constants.glob.logger.error("Error opening device handler file")
             sys.exit(1)
 
     def read(self):
         """
-        This is the heart of any comunication between
-        phisic and virtual device that is being simulated
+        This is the heart of any communication between
+        physic and virtual device that is being simulated
         at the other point. Here we just read the events
         and put it in a queue to be sent to device
         """
 
-        # Device (phisical) name
+        # Device (physical) name
         device = self.info.get('name')
 
         # We need a event list because some events, like EV_ABS
@@ -293,7 +292,7 @@ class PhisicalDevice(object):
             if len(server.updates.clients) > 1:
 
                 # We instantiate an structure input_event and fill with
-                # buffer to check if event is diferent of EV_SYNC.
+                # buffer to check if event is different of EV_SYNC.
                 ie = structures.input.InputEvent.from_buffer_copy(buffer)
                 # print(ie.type, ie.code, ie.value)
 
@@ -343,5 +342,5 @@ class PhisicalDevice(object):
 
 __all__ = [
     'VirtualDevice',
-    'PhisicalDevice'
+    'PhysicalDevice'
 ]

@@ -13,14 +13,14 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-# This itens that can chage their values
+# This items that can change their values
 # any time during the program execution
 
 import constants.glob
 import queue
 
 devices = {}    # Devices capabilities
-clients = {}    # Clients informations
+clients = {}    # Clients information
 focus = None    # Client at focus now
 
 # This is a simple first-in first-out

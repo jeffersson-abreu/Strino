@@ -98,7 +98,7 @@ def digest_announcement(data, protocol):
 
     except Exception as exc:
         # Generate an event announcement response to the client
-        constants.glob.logger.critical("Someting went wrong when digesting announcement")
+        constants.glob.logger.critical("Something went wrong when digesting announcement")
         constants.glob.logger.critical(f"{exc}")
         response = generate_announcement_response(result=False)
         protocol.transport.write(response)
