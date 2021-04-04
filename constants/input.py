@@ -54,6 +54,10 @@ BUS_VIRTUAL = 0x06
 
 # Get device properties
 def EVIOCGPROP(length):
+    """
+
+    :rtype: object
+    """
     return constants.llevel.ior(DEVICE_ID_BASE, 0x09, length)
 
 

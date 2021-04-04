@@ -71,14 +71,25 @@ def natural_sort(_list: list, keyword=None) -> list:
     return sorted(_list, key=lambda key: order_by_alphanum(key, keyword=keyword))
 
 
-def generate_random_id(size=8, chars=string.ascii_uppercase + string.digits):
+def generate_random_id(size=20, chars=string.ascii_uppercase + string.digits):
     """ Generate a random id to make clean clients server space """
     return ''.join(random.choice(chars) for _ in range(size))
+
+
+def is_in_bitmask(bitmask: bytes, bit: int) -> int:
+    """
+    Check an int in a bitmask
+    :param bitmask: Bytes
+    :param bit: integer to check in the bitmask
+    :return: Operation product
+    """
+    return bitmask[bit//8] & (1 << (bit % 8))
 
 
 __all__ = [
     'natural_sort',
     'order_by_alphanum',
     'generate_random_id',
+    'is_in_bitmask',
     'to_int'
 ]

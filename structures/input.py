@@ -13,7 +13,7 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-import constants.glob
+
 import structures.time
 import ctypes
 
@@ -64,28 +64,8 @@ class InputEvent(ctypes.Structure):
     ]
 
 
-class UinputSetup(ctypes.Structure):
-    """
-    Represents a uinput setup
-    """
-    _fields_ = [
-        ("id", InputId),
-        ("name", ctypes.c_char * constants.glob.UINPUT_MAX_NAME_SIZE),
-        ("ff_effects_max", ctypes.c_uint32),
-    ]
-
-
-class UinputAbsSetup(ctypes.Structure):
-    _fields_ = [
-        ('code',   ctypes.c_uint16),    # axis
-        ('absinfo', ABSInfo),           # ABS info
-    ]
-
-
 __all__ = [
-    'InputId',
-    'ABSInfo',
     'InputEvent',
-    'UinputSetup',
-    'UinputAbsSetup'
+    'InputId',
+    'ABSInfo'
 ]

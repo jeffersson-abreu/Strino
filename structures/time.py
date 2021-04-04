@@ -22,3 +22,8 @@ class Timeval(ctypes.Structure):
         ("tv_sec", ctypes.c_int),
         ("tv_usec", ctypes.c_long)
     ]
+
+
+__all__ = [
+    'Timeval'
+]

@@ -14,6 +14,5 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 __all__ = [
-    'updates',
     'server'
 ]

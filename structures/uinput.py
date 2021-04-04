@@ -13,10 +13,32 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
+from structures.input import InputId, ABSInfo
+import ctypes
+
+UINPUT_MAX_NAME_SIZE = 80
+
+
+class UinputSetup(ctypes.Structure):
+    """
+    Represents a uinput setup
+    """
+    _fields_ = [
+        ("id", InputId),
+        ("name", ctypes.c_char * UINPUT_MAX_NAME_SIZE),
+        ("ff_effects_max", ctypes.c_uint32),
+    ]
+
+
+class UinputAbsSetup(ctypes.Structure):
+    """ Used to set absolute events """
+    _fields_ = [
+        ('code',   ctypes.c_uint16),    # axis
+        ('absinfo', ABSInfo),           # ABS info
+    ]
+
+
 __all__ = [
-    'globals',
-    'input',
-    'ecodes',
-    'llevel',
-    'uinput'
+    'UinputAbsSetup',
+    'UinputSetup'
 ]

@@ -16,11 +16,6 @@
 import logging
 import os
 
-# Linux living devices handler files
-DEVICES_PATH = '/dev/input'
-
-UINPUT_MAX_NAME_SIZE = 80
-
 # Add a base to build absolute path's
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,10 +31,3 @@ logging.basicConfig(
     level=logging.INFO,
     filemode='w'
 )
-
-
-list_header = """
-    \rBellow a list of all devices found on the system, if your pretended device 
-    \rwas not in the list so verify if the device is really connected in a working 
-    \rUSB port. If your device is not USB may it's not recognized by the system. 
-"""

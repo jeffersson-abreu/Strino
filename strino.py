@@ -15,9 +15,10 @@
 
 from server.server import start_server
 from client.client import connect_to
+import constants.globals
+import devices.physical
+import misc.functions
 import configparser
-import functions
-import constants
 import argparse
 import logging
 import sys
@@ -32,7 +33,7 @@ if __name__ == '__main__':
         print('We need root access!')
         sys.exit(1)
 
-    settings = os.path.join(constants.glob.BASE_DIR, 'etc/settings.ini')
+    settings = os.path.join(constants.globals.BASE_DIR, 'etc/settings.ini')
 
     # Get the default server from settings
     config = configparser.ConfigParser()
@@ -48,8 +49,8 @@ if __name__ == '__main__':
     dev_section = config['STRINO_DEVICES']
 
     # Check if devices has handlers and pass it as default
-    devices = [dev_section.get(device) for device in dev_section]
-    handlers = functions.system.get_handlers_by_devices_name(devices)
+    names = [dev_section.get(device) for device in dev_section]
+    handlers = misc.functions.get_handlers_by_devices_name(names)
 
     parser = argparse.ArgumentParser(description='Share your IO in unix like operating systems with Strino.')
     parser.add_argument('-d', '--devices', help='List devices handlers to share', nargs='*', type=str, default=handlers)
@@ -64,40 +65,49 @@ if __name__ == '__main__':
     if args.verbose:
         # Add a handler and set the default output to stdout
         handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter(constants.glob.format_string, datefmt=constants.glob.format_date)
+        formatter = logging.Formatter(constants.globals.format_string, datefmt=constants.globals.format_date)
         handler.setFormatter(formatter)
         handler.setLevel(logging.INFO)
 
-        constants.glob.logger.addHandler(handler)
-        constants.glob.logger.info('Verbose output is set to true')
+        constants.globals.logger.addHandler(handler)
+        constants.globals.logger.info('Verbose output is set to true')
 
     if args.list:
-        devices = functions.system.get_all_devices_info()
-        print(constants.glob.list_header)
+        handlers_mixed = misc.functions.get_all_devices_handlers()
+        handlers_sorted = misc.utils.natural_sort(handlers_mixed)
+        devices_list = [devices.physical.PhysicalDevice(handler) for handler in handlers_sorted]
 
-        devices = functions.utils.natural_sort(devices, keyword='handler')
+        print(
+            """
+            \rBellow a list of all devices found on the system, if your pretended device 
+            \rwas not in the list so verify if the device is really connected in a working 
+            \rUSB port. If your device is not USB may it's not recognized by the system. 
+            """
+        )
+
         print(f"{'Handler':<10} {'Device name'}")
 
-        for device in devices:
-            print(f"{os.path.basename(device.get('handler')):<10} {device.get('name')}")
+        for handler, device in zip(handlers_sorted, devices_list):
+            print(f"{os.path.basename(handler):<10} {device.name}")
+        sys.exit(0)
 
     if args.type:
 
         if args.type == 'server':
 
             # Get a list of all available events handlers in system
-            handlers = functions.system.get_all_devices_handlers(basename=True)
+            handlers = misc.functions.get_all_devices_handlers(basename=True)
 
             # Filter devices to accept only valid devices.
             # This devices should exists in handlers
             filtered_devices = []
             for device in args.devices:
                 if device not in handlers:
-                    constants.glob.logger.info(f"{device} is not a valid device handler")
+                    constants.globals.logger.info(f"{device} is not a valid device handler")
                     continue
 
                 filtered_devices.append(
-                    os.path.join(constants.glob.DEVICES_PATH, device)
+                    os.path.join('/dev/input', device)
                 )
 
             start_server(args.addr, args.port, filtered_devices)

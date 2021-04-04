@@ -14,9 +14,6 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 __all__ = [
-    'globals',
-    'input',
-    'ecodes',
-    'llevel',
-    'uinput'
+    'functions',
+    'utils'
 ]

@@ -13,10 +13,11 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-from events.comunication import *
-import constants.glob
+
+from networking.handlers import *
+import constants.globals
+import asyncio
 import pickle
-import json
 import sys
 
 
@@ -27,14 +28,9 @@ class Events(object):
         # All events should have a generate and a digest
         # callback function to keep a nice communication
         self._events = {
-            "ANNOUNCEMENT": {
-                "generate": generate_announcement,
-                "digest": digest_announcement
-            },
-
-            "ANNOUNCEMENT_RESPONSE": {
-                "generate": generate_announcement_response,
-                "digest": digest_announcement_response
+            "CREATE_DEVICE": {
+                "generate": generate_create_device,
+                "digest": digest_create_device
             },
 
             "DEVICE_EVENT": {
@@ -43,7 +39,7 @@ class Events(object):
             }
         }
 
-    def handle(self, data, protocol):
+    def handle(self, data: bytes, protocol: asyncio.Protocol):
         """
         Handle an event in hole application
         :param protocol: asyncio.Protocol instance
@@ -56,8 +52,8 @@ class Events(object):
             event_name = event.get("name")
             event_data = event.get("data")
         except Exception as exc:
-            constants.glob.logger.warning("Error receiving event")
-            constants.glob.logger.warning(exc)
+            constants.globals.logger.warning("Error receiving event")
+            constants.globals.logger.warning(exc)
             return False
 
         # Check if the received event is listed as valid
@@ -88,8 +84,8 @@ class Events(object):
             event = callback(*args, **kwargs)
             return event
 
-        constants.glob.logger.critical(f"Event {event_name} is not recognized")
-        constants.glob.logger.info(f"Exiting now")
+        constants.globals.logger.critical(f"Event {event_name} is not recognized")
+        constants.globals.logger.info(f"Exiting now")
         # Return None if the event is not valid
         sys.exit(1)
 
