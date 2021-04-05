@@ -13,9 +13,12 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
+import constants.globals
+import subprocess
 import random
 import string
 import re
+import os
 
 
 def to_int(obj: str):
@@ -84,6 +87,99 @@ def is_in_bitmask(bitmask: bytes, bit: int) -> int:
     :return: Operation product
     """
     return bitmask[bit//8] & (1 << (bit % 8))
+
+
+def detect_system_type():
+    """
+    This function is responsible to detect
+    witch kind of system we are running
+    """
+    command = 'ps --no-headers -o comm 1'
+    system_encoded = subprocess.check_output(command.split())
+    system_not_scape = system_encoded.decode()
+    system = system_not_scape.strip('\n')
+    return system
+
+
+def disable_strino_service(system) -> bool:
+    """
+    Disable strino from start at boot time as a service
+
+    :param system:  The system running type (E.g: systemd)
+    :return: True if no errors and False if some error occurs
+    """
+
+    commands = {
+        'systemd': [
+            "systemctl disable strino",
+            "rm /etc/systemd/system/strino.service"
+
+        ]
+    }
+
+    if system in list(commands.keys()):
+        # Execute all commands
+        for command in commands.get(system):
+            try:
+                output = subprocess.check_output(command.split(), stderr=subprocess.DEVNULL)
+                continue
+            except subprocess.CalledProcessError:
+                constants.globals.logger.error(f"Error while disabling strino {system} service")
+        return True
+    else:
+        constants.globals.logger.error(f"Unknown {system} system type")
+        constants.globals.logger.error(f"System {system} not supported")
+        return False
+
+
+def enable_strino_service(system) -> bool:
+    """
+    Enable strino to start at boot time as a service
+
+    :param system:  The system running type (E.g: systemd)
+    :return: True if no errors and False if some error occurs
+    """
+
+    # Build the relative path to the service based on system
+    relative_path = os.path.join('etc/services', system)
+
+    # Build a full path to the service
+    file_path = os.path.join(
+        constants.globals.BASE_DIR,
+        relative_path
+    )
+
+    commands = {
+        'systemd': [
+            f"cp {file_path} /etc/systemd/system/strino.service",
+            'systemctl enable strino'
+        ]
+    }
+
+    # Save a result reference
+    result = None
+
+    if os.path.isfile(file_path):
+        if system in commands.keys():
+
+            # Execute all commands
+            for command in commands.get(system):
+                try:
+
+                    output = subprocess.check_output(command.split(), stderr=subprocess.DEVNULL)
+                    result = True
+                    continue
+
+                except subprocess.CalledProcessError:
+                    constants.globals.logger.error(f"Fail to enable strino {system} service")
+                    result = False
+                    break
+        else:
+            constants.globals.logger.error(f"Unknown {system} system type")
+            constants.globals.logger.error(f"System {system} not supported")
+            result = False
+
+    return result
 
 
 __all__ = [

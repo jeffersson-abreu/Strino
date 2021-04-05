@@ -1,5 +1,5 @@
 [Unit]
-Description=Strino client - Share your peripherals
+Description=Strino - Share your peripherals
 After=network.target
 StartLimitIntervalSec=0
 
