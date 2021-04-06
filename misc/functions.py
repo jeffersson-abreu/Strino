@@ -13,7 +13,8 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
-from structures.ifaddrs import Ifaddrs, Sockaddr
+from structures.ifaddrs import Ifaddrs, SockAddrIn, SockAddrIn6
+from typing import Dict
 import constants.input
 import ctypes
 import socket
@@ -84,54 +85,47 @@ def get_network_interfaces() -> dict:
     ifaddrs = Ifaddrs()
     libc.getifaddrs(ctypes.byref(ifaddrs))
 
-    # This is the IPv4 address and broadcast of the interface
-    ipv4 = ctypes.create_string_buffer(socket.NI_MAXHOST)
-
     # Keep a reference of all interfaces and
     # save ifaddrs head to be free later
-    interfaces = {}
+    interfaces: Dict[Dict] = {}
     ifa = ifaddrs
 
     while ifa.ifa_next:
         ifa = ifa.ifa_next.contents
         ifname = ifa.ifa_name.decode()
 
-        # When we have the info we need,
-        # so we can stop the loop
-        if ifname in interfaces.keys():
-            element = interfaces[ifname]
-            if 'address' in element.keys():
-                if 'broadcast' in element.keys():
-                    break
-
-        interfaces[ifname] = {}
+        if ifname not in interfaces.keys():
+            interfaces[ifname] = {}
 
         if ifa.ifa_addr:
-            # Get the interface local address
+
             family = ifa.ifa_addr.contents.sa_family
 
-            if family == socket.AF_INET:
-                s = libc.getnameinfo(ifa.ifa_addr, ctypes.sizeof(Sockaddr), ipv4, ctypes.sizeof(ipv4), None, 0, socket.NI_NUMERICHOST)
+            # Retrieve address only for IPv4 and IPv6 addresses
+            if family == socket.AF_INET or family == socket.AF_INET6:
 
-                if s != 0:
-                    constants.globals.logger.error("Cold not retrieve interface address")
-                    interfaces[ifname]['address'] = ''
-                    continue
+                if family == socket.AF_INET:
+                    # Get the interface local IPV4 address and broadcast
+                    _in_4 = ctypes.cast(ifa.ifa_addr, ctypes.POINTER(SockAddrIn))
+                    _in_4_brd = ctypes.cast(ifa.ifu_broaddr, ctypes.POINTER(SockAddrIn))
 
-                interfaces[ifname]['address'] = ipv4.value.decode()
+                    ipv4 = socket.inet_ntop(socket.AF_INET, _in_4.contents.sin_addr)
+                    broadcast = socket.inet_ntop(socket.AF_INET, _in_4_brd.contents.sin_addr)
 
-        if ifa.ifu_broaddr:
-            # Get the interface local broadcast address
-            family = ifa.ifu_broaddr.contents.sa_family
+                    # Update our information
+                    interface = interfaces[ifname]
+                    interface.update(
+                        broadcast=broadcast,
+                        ipv4=ipv4
+                    )
 
-            if family == socket.AF_INET:
-                s = libc.getnameinfo(ifa.ifu_broaddr, ctypes.sizeof(Sockaddr), ipv4, ctypes.sizeof(ipv4), None, 0, socket.NI_NUMERICHOST)
+                if family == socket.AF_INET6:
+                    # Get the interface local IPV6 address
+                    _in_6 = ctypes.cast(ifa.ifa_addr, ctypes.POINTER(SockAddrIn6))
+                    ipv6 = socket.inet_ntop(socket.AF_INET6, _in_6.contents.sin6_addr)
 
-                if s != 0:
-                    constants.globals.logger.error("Cold not retrieve interface broadcast")
-                    interfaces[ifname]['broadcast'] = ''
-                    continue
-
-                interfaces[ifname]['broadcast'] = ipv4.value.decode()
+                    # Update our information
+                    interface = interfaces[ifname]
+                    interface.update(ipv6=ipv6)
 
     return interfaces
