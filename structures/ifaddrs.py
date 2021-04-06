@@ -51,7 +51,7 @@ class InAddr(ctypes.Structure):
     """
 
     _fields_ = [
-        ('s_addr', ctypes.c_ulong),   # IPV4 Load with inet_aton()
+        ('s_addr', ctypes.c_uint32),   # IPV4 Load with inet_aton()
     ]
 
 
