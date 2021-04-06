@@ -13,8 +13,10 @@
 #
 # Author: Jeffersson Abreu (ctw6av)
 
+from structures.ifaddrs import Ifaddrs, Sockaddr
 import constants.input
 import ctypes
+import socket
 import fcntl
 import os
 
@@ -66,3 +68,70 @@ def get_handlers_by_devices_name(names: list):
             constants.globals.logger.warning(f"Device {decoded_name} not exists")
 
     return handlers
+
+
+def get_network_interfaces() -> dict:
+    """
+    Get all network interfaces in the system
+    The data comes with address and broadcast
+
+    :returns: Dict with interfaces information
+    """
+
+    # Load library and prepare ifaddrs to
+    # be filled by getifaddrs call
+    libc = ctypes.CDLL('libc.so.6')
+    ifaddrs = Ifaddrs()
+    libc.getifaddrs(ctypes.byref(ifaddrs))
+
+    # This is the IPv4 address and broadcast of the interface
+    ipv4 = ctypes.create_string_buffer(socket.NI_MAXHOST)
+
+    # Keep a reference of all interfaces and
+    # save ifaddrs head to be free later
+    interfaces = {}
+    ifa = ifaddrs
+
+    while ifa.ifa_next:
+        ifa = ifa.ifa_next.contents
+        ifname = ifa.ifa_name.decode()
+
+        # When we have the info we need,
+        # so we can stop the loop
+        if ifname in interfaces.keys():
+            element = interfaces[ifname]
+            if 'address' in element.keys():
+                if 'broadcast' in element.keys():
+                    break
+
+        interfaces[ifname] = {}
+
+        if ifa.ifa_addr:
+            # Get the interface local address
+            family = ifa.ifa_addr.contents.sa_family
+
+            if family == socket.AF_INET:
+                s = libc.getnameinfo(ifa.ifa_addr, ctypes.sizeof(Sockaddr), ipv4, ctypes.sizeof(ipv4), None, 0, socket.NI_NUMERICHOST)
+
+                if s != 0:
+                    constants.globals.logger.error("Cold not retrieve interface address")
+                    interfaces[ifname]['address'] = ''
+                    continue
+
+                interfaces[ifname]['address'] = ipv4.value.decode()
+
+        if ifa.ifu_broaddr:
+            # Get the interface local broadcast address
+            family = ifa.ifu_broaddr.contents.sa_family
+
+            if family == socket.AF_INET:
+                s = libc.getnameinfo(ifa.ifu_broaddr, ctypes.sizeof(Sockaddr), ipv4, ctypes.sizeof(ipv4), None, 0, socket.NI_NUMERICHOST)
+
+                if s != 0:
+                    constants.globals.logger.error("Cold not retrieve interface broadcast")
+                    interfaces[ifname]['broadcast'] = ''
+                    continue
+
+                interfaces[ifname]['broadcast'] = ipv4.value.decode()
+
+    return interfaces
