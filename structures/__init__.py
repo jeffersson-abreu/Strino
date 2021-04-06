@@ -14,6 +14,7 @@
 # Author: Jeffersson Abreu (ctw6av)
 
 __all__ = [
+    'ifaddrs',
     'input',
     'uinput',
     'time'
