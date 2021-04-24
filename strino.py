@@ -27,12 +27,6 @@ import os
 
 if __name__ == '__main__':
 
-    # Check if user has root access.
-    # All operations need root
-    if os.geteuid():
-        print('We need root access!')
-        sys.exit(1)
-
     settings = os.path.join(constants.globals.BASE_DIR, 'etc/settings.ini')
 
     # Get the default server from settings
