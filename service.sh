@@ -52,6 +52,22 @@ fi
 
 service_name="strino.service"
 
+# Fixme: Security fail adding normal user to root group. Normal user has no read
+# Fixme: permission to /dev/input/event* and no write permission to /dev/uinput
+is_in_group=0
+
+for group in $(groups jeffersson | cut -d: -f2); do
+  if [[ $group == "root" ]]; then
+    is_in_group=1
+  fi
+done
+
+if [[ $is_in_group -eq 0 ]]; then
+  echo "Giving root access permission to user"
+  usermod -a -G root "$1"
+  chmod g+rw /dev/uinput
+fi
+
 if [[ ! -f "${user_service_path}/$service_name" ]]; then
   echo "Enabling strino service at boot to user: $1"
   echo "$service_content" > "${user_service_path}"/"$service_name"
@@ -60,5 +76,4 @@ if [[ ! -f "${user_service_path}/$service_name" ]]; then
 
   echo "Starting strino service right now"
   sudo -u "$1" XDG_RUNTIME_DIR=/run/user/"$(id -u "$1")" systemctl --user start strino
-
 fi
